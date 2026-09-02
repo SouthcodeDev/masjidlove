@@ -1,15 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { useColorScheme as useRNColorScheme } from 'react-native';
 
 /**
- * To support static rendering, this value needs to be re-calculated on the client side for web
+ * To support static rendering, this value needs to be re-calculated on the client side for web.
+ *
+ * Hydration is detected with `useSyncExternalStore` rather than a `setState` in an effect:
+ * React uses `getServerSnapshot` (false) for the server render and the hydrating client
+ * render, then re-renders with `getSnapshot` (true) once hydrated. Same two-pass behaviour,
+ * without the cascading-render pattern that `react-hooks/set-state-in-effect` flags.
  */
-export function useColorScheme() {
-  const [hasHydrated, setHasHydrated] = useState(false);
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
+export function useColorScheme() {
+  const hasHydrated = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const colorScheme = useRNColorScheme();
 
