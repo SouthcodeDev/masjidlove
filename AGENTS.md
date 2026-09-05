@@ -314,22 +314,31 @@ gamification, ticketing, check-ins, streaks, badges.
 
 ## Part B — Repo facts
 
-> **Status: GENERATED — 5 September 2026** by the agent session that ran SETUP.md §1–§7.
-> Every line below corresponds to a file or command output observed in that session.
-> §8 (Vercel deploy) and §9 (Windows clone verification) were **not** run; see B.8.
+> **Status: REGENERATED — 5 September 2026** by an agent session that re-ran the SETUP.md
+> §1–§8 gates directly. Every line below corresponds to a file or command output observed in
+> that session. §6 (real-phone install), §8 (Vercel deploy) and §9 (Windows clone) were **not**
+> verifiable in that environment; see B.8.
+>
+> **Observed with an uncommitted edit in the tree:** `src/app/page.tsx` is modified (heading
+> `MasjidLove`, button `Hishaam is the laanie`, link `Hoyaaaaa`) versus the committed
+> `MasjidLuv` / `Get started` / `About`. Runtime observations below reflect the working tree.
 
 ### B.1 Stack and versions
 
-From `package.json` / `npm ls`, observed 5 Sep 2026. Environment: Node v24.14.0, npm 11.19.1, macOS.
+From `package.json` and `package-lock.json` (lockfileVersion 3), confirmed against `npm ls`.
+Environment: Node v24.14.0, npm 11.19.1, git 2.50.1 (Apple Git-155), macOS 26.5 arm64.
 
-| Package | Version |
+| Package | Version (lockfile) |
 |---|---|
 | next | 16.3.4 (App Router, Turbopack) |
 | react / react-dom | 19.2.8 / 19.2.8 |
 | typescript | 5.9.3 |
 | tailwindcss | 4.3.3 (v4 — `@theme` in globals.css, no JS config) |
+| @tailwindcss/postcss | 4.3.3 |
 | @heroui/react | 3.2.4 |
 | @heroui/styles | 3.2.4 |
+| eslint | 9.39.5 (npm warns this version is no longer supported) |
+| eslint-config-next | 16.3.4 |
 
 Pinned: `packageManager: npm@11.19.1`, `engines.node >=20`, `.nvmrc` → 24.14.0.
 
@@ -339,49 +348,79 @@ provider, any test runner.
 
 ### B.2 Directory map
 
+Exhaustive file list under `src/` and `public/`, observed via `find`:
+
 ```
-src/app/          layout.tsx (server, exports metadata+viewport), page.tsx, about/page.tsx,
-                  globals.css (imports + app shell + @theme), manifest.ts, favicon.ico
-src/components/   register-service-worker.tsx ("use client", registers /sw.js)
-public/           sw.js (installability-only fetch handler), icon-192/512/maskable PNGs,
-                  apple-touch-icon.png (180px), scaffold *.svg leftovers
+src/app/          layout.tsx (server; exports metadata + viewport), page.tsx, about/page.tsx,
+                  globals.css, manifest.ts, favicon.ico
+src/components/   register-service-worker.tsx
+public/           sw.js, icon-192.png, icon-512.png, icon-maskable-512.png,
+                  apple-touch-icon.png, file.svg, globe.svg, next.svg, vercel.svg,
+                  window.svg  (the five *.svg are create-next-app leftovers, unused)
+root              AGENTS.md, CLAUDE.md, SETUP.md, README.md (unedited create-next-app text),
+                  package.json, package-lock.json, next.config.ts (empty config object),
+                  postcss.config.mjs, eslint.config.mjs, tsconfig.json, .nvmrc, .gitignore
 ```
 
 Missing (first agent to need one should create it): `src/hooks/`, `src/services/`,
-`src/types/`, `docs/`, `src/app/api/`, `middleware.ts`.
+`src/types/`, `src/app/api/`, `middleware.ts`.
+
+**Missing but referenced by Part A's own file table — real drift:** `STATUS.md`,
+`docs/ARCHITECTURE.md`, `docs/DATABASE.md`, `docs/DESIGN.md`. Part A tells you to read
+`STATUS.md` immediately after this file; it does not exist. SETUP.md §10 defers the three
+`docs/` files, but does **not** defer `STATUS.md`.
 
 ### B.3 Commands
 
-All observed 5 Sep 2026, exit codes as returned:
+Observed 5 Sep 2026, exit codes as returned:
 
 | Script | Command | Exit | Notes |
 |---|---|---|---|
-| dev | `next dev` | 0 | serves on :3000 |
-| build | `next build` | 0 | routes: `/`, `/about`, `/manifest.webmanifest` |
-| lint | `eslint` | 0 | |
-| start | `next start` | 0 | used for the rendered-HTML checks |
-| — | `npx tsc --noEmit` | 0 | no `typecheck` script exists; run via npx |
+| build | `next build` | 0 | Turbopack. Routes: `/`, `/_not-found`, `/about`, `/manifest.webmanifest` — all `○ (Static)` |
+| lint | `eslint` | 0 | no output |
+| start | `next start` | 0 | verified on `-p 3210`; **default :3000 was occupied** (see B.8) |
+| dev | `next dev` | — | Next 16 **refuses a second dev server for the same directory**; verified against the instance already running for this repo on :3001 |
+| — | `npx tsc --noEmit` | 0 | no `typecheck` script exists in `package.json`; run via npx |
+| — | `npm ci` | 0 | 408 packages; `package-lock.json` byte-identical afterwards (no churn) |
 
-None destructive.
+`npm ci` warns that `unrs-resolver@1.12.2` has an unapproved postinstall script. None of the
+above are destructive to the repo; `npm ci` does replace `node_modules`.
 
 ### B.4 Schema summary
 
-**No database exists.** No Supabase client, no migrations, no schema. (Verified: nothing
-under `src/` references Supabase; SETUP.md §10 defers it.)
+**No database exists.** No Supabase client, no migrations, no schema. Nothing under `src/`
+references Supabase. SETUP.md §10 defers it.
 
 ### B.5 Existing components, hooks and services (reuse inventory)
 
 Exhaustive as of 5 Sep 2026:
 
-- `src/components/register-service-worker.tsx` — `RegisterServiceWorker`; client component, renders null, registers `/sw.js` once on mount.
-- No hooks, services, or types exist yet. `src/app/page.tsx` and `about/page.tsx` are the only pages; both `"use client"`.
+- `src/components/register-service-worker.tsx` — `RegisterServiceWorker`; client component,
+  returns `null`, registers `/sw.js` once in a mount effect, swallows rejection.
+- `src/app/manifest.ts` — default-exported `manifest()` returning `MetadataRoute.Manifest`.
+  Route convention, not a component; carries no `"use client"` and needs none.
+- No hooks, services, or types exist. `src/app/page.tsx` and `src/app/about/page.tsx` are the
+  only pages; both carry `"use client"`. `layout.tsx` is the only server component.
 
 ### B.6 Design tokens
 
-`@theme inline` block in `src/app/globals.css` contains **only** the two font mappings
-(`--font-sans`, `--font-mono` → next/font variables). It is deliberately unpopulated —
-no colour palette, no type scale, no radius scale. HeroUI v3 defaults stand until
-`docs/DESIGN.md` exists. Icon/manifest colours (`#ffffff`, `#1a1a1a`) are placeholders.
+`@theme inline` in `src/app/globals.css` contains **only** the two font mappings
+(`--font-sans`, `--font-mono` → next/font Geist variables). Deliberately unpopulated — no
+colour palette, no type scale, no radius scale. HeroUI v3 defaults stand until
+`docs/DESIGN.md` exists. Manifest `theme_color` and `background_color` are both `#ffffff`
+(placeholders).
+
+App-shell rules in the same file, all confirmed present in the served CSS bundle:
+`-webkit-tap-highlight-color: transparent`; `body { overscroll-behavior: none; min-height:
+100dvh }`; `user-select: none` scoped to `a, button, [role=button]`; `:focus-visible {
+outline: 2px solid currentColor; outline-offset: 2px }`; a `prefers-reduced-motion: reduce`
+block; and `.app-frame { width:100%; max-width:390px; min-height:100dvh; margin-inline:auto }`.
+
+**Cascade note (verified, not assumed):** globals.css imports `tailwindcss` then
+`@heroui/styles`, but Tailwind emits the authored rules *last* — the `:focus-visible` outline
+lands at byte ~409,000 of the bundle, after HeroUI's five `:focus-visible{outline-style:none}`
+resets (bytes 138k–306k). The app-wide focus ring therefore wins. Do not reorder those imports
+without re-checking this.
 
 ### B.7 Route handlers
 
@@ -389,28 +428,59 @@ no colour palette, no type scale, no radius scale. HeroUI v3 defaults stand unti
 
 ### B.8 Known gaps and debt
 
-- **SETUP.md §8 not done:** Vercel CLI logged out; deploy and the deploy gates are
-  unverified. `vercel login` is interactive — needs a human.
-- **§9 not done:** Windows clone verification is Ameer's, by design.
-- **Real-phone install unverified:** Lighthouse 12 has no installability category; the
-  manifest fields, icons, SW, and HTTPS-pending-on-deploy were verified directly. The
-  "installs on a real iPhone" gate remains open.
-- Branch is `master`, not `main` as SETUP.md assumes.
-- Client-side nav was proven via headless Chrome CDP (navigation entries stayed at 1
-  after clicking `/about`), not on a physical device.
-- `public/*.svg` scaffold leftovers are committed but unused.
+Verified this session:
+
+- **§6 real-phone install — NOT VERIFIABLE here, and the gate as written is stale.** The gate
+  says "Lighthouse's installability check passes". Lighthouse **13.4.1** (run against the
+  production build) exposes only `performance, accessibility, best-practices, seo` — it has
+  **no installability, PWA, or manifest audits at all**. The criteria were instead confirmed
+  directly: manifest served as `application/manifest+json` with `display: standalone`,
+  `start_url: /`, both colours, and icons at 192/512/512-maskable; all four PNGs return 200
+  with pixel dimensions matching their declarations (192×192, 512×512, 512×512, 180×180);
+  `apple-touch-icon` and `apple-mobile-web-app-*` present in the rendered head; `/sw.js`
+  serves as JavaScript with a fetch handler and registers `active: true` in a real browser.
+  The "installs on a real iPhone home screen" half remains **unverified**.
+- **§8 Vercel deploy — NOT VERIFIABLE here.** No `.vercel/` directory, no Vercel CLI on PATH,
+  no `gh` CLI, no credentials. Whether a production URL exists is unknown, not failing.
+  SETUP.md §8 also says deploy `main`; the branch is `master`.
+- **§9 Windows clone — NOT VERIFIABLE here** (macOS only); Ameer's, by design.
+- **Accessibility defect, HeroUI default:** the primary `<Button>` fails WCAG AA contrast —
+  **3.58:1** (`#fcfcfc` on `#0485f7`, 14px), needs 4.5:1. This is HeroUI v3's stock `--accent`,
+  not authored here. Per Part A, colour is a design decision — it needs raising, not a silent
+  patch. This is the only accessibility audit failure (category score 0.95).
+- **Touch-target shortfall:** the HeroUI button measures **40px** tall at 390px, under Part A's
+  44px minimum. The `/about` link is 44px and complies.
+- **Port :3000 is occupied by a stale unrelated `next-server`** (PID 44184 at time of writing)
+  that serves an *older* build of this repo. A second `next dev` for this directory is also
+  running on :3001. Anything checked against :3000 without confirming the listener is
+  measuring the wrong server — this produced a false reading during verification.
+- `.gitignore` line 34 is `.env*`, which **also ignores `.env.example`** (confirmed with
+  `git check-ignore`). Part A requires `.env.example` to be a committed template; it does not
+  currently exist, and adding it will need a `!.env.example` negation.
+- Local branch `chore/setup-hygiene-fixes` (da84733) still exists and is fully contained in
+  `master`; safe to delete.
+- README.md is still unedited create-next-app boilerplate.
+- Build emits a `/_not-found` route that earlier revisions of this document omitted.
 
 ### B.9 Repo conventions worth not breaking
 
-- Branch: `master` (pushed to origin). Tags: `expo-archive` preserves the old Expo tree.
-- `package-lock.json` committed; `npm ci` clean from it (verified once).
-- `"use client"` on every component/page including `page.tsx` files; `layout.tsx` is the
-  only server component in `src/app/`.
-- Path alias `@/*` → `src/*`.
+- Branch: `master` (tracking `origin/master`, 0 ahead / 0 behind at
+  `a9e8bdd`). Remote: `github.com/SouthcodeDev/masjidlove`.
+- Tag `expo-archive` → `4a0388f`, present on origin. **Its tree genuinely preserves the Expo
+  project** (`app.json`, `eas.json`, `types/expo.d.ts`, `assets/expo.icon/…`) even though its
+  commit *subject* is a docs commit — it is the pre-removal tip, and `dc8eb9f` ("Remove Expo
+  project") is its direct child. Verified by `git ls-tree`; do not "fix" this tag.
+- `package-lock.json` committed; `npm ci` reproduces it with no diff (verified this session).
+- `"use client"` on every component and page; `layout.tsx` and `manifest.ts` are the only
+  files under `src/app/` without it, both legitimately.
+- Path alias `@/*` → `src/*` (`tsconfig.json`), `strict: true`, `noEmit: true`.
+- `eslint.config.mjs` is flat config composing `eslint-config-next/core-web-vitals` and
+  `/typescript`, re-declaring the default ignores.
 - `CLAUDE.md` is a one-line pointer (`@AGENTS.md`) regenerated by `create-next-app`; keep it.
-- The `nextjs-agent-rules` block at the top of this file is rewritten by `next dev`;
-  commit it rather than deleting it.
-- `.gitignore` is the create-next-app default (`.next/`, `node_modules/` ignored).
+- The `nextjs-agent-rules` block at the top of this file is rewritten by `next dev`; commit it
+  rather than deleting it.
+- `.gitignore` is the create-next-app default — `.next/`, `node_modules/`, `next-env.d.ts`
+  and `*.tsbuildinfo` are ignored (and `tsconfig.tsbuildinfo` is correctly untracked).
 
 ---
 
