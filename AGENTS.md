@@ -314,42 +314,103 @@ gamification, ticketing, check-ins, streaks, badges.
 
 ## Part B — Repo facts
 
-> **Status: NOT GENERATED. Nothing below has been verified.**
->
-> The previous Part B described an Expo project that no longer exists. It has been removed
-> rather than adapted, because a Part B containing plausible-but-unverified facts is worse
-> than an empty one — an agent will trust it.
->
-> **Do not populate this section by inference.** Every line must correspond to a file or
-> command output that was actually observed. Until then, `SETUP.md` is the authority on what
-> the repo should contain, and the repo itself is the authority on what it does contain.
+> **Status: GENERATED — 5 September 2026** by the agent session that ran SETUP.md §1–§7.
+> Every line below corresponds to a file or command output observed in that session.
+> §8 (Vercel deploy) and §9 (Windows clone verification) were **not** run; see B.8.
 
-### Generation checklist
+### B.1 Stack and versions
 
-Regenerate Part B by inspecting the repository, in this order. Each section states its
-evidence source. If a section can't be verified, write "unverified" — don't guess.
+From `package.json` / `npm ls`, observed 5 Sep 2026. Environment: Node v24.14.0, npm 11.19.1, macOS.
 
-- [ ] **B.1 Stack and versions** — from `package.json` and installed `node_modules`. Node and
-      package-manager versions from the local environment. Mark anything declared in Part A
-      but **not installed** as absent, explicitly.
-- [ ] **B.2 Directory map** — from the actual tree. Note which directories are missing, and
-      say what the first agent to need one should do.
-- [ ] **B.3 Commands** — every script in `package.json`, run, with the exit code it actually
-      returned. Flag any that are destructive, and any that don't exist yet.
-- [ ] **B.4 Schema summary** — from the live Supabase schema via MCP, or "no database
-      exists" if there isn't one. Do not transcribe `docs/DATABASE.md`; that's the intent,
-      not the state.
-- [ ] **B.5 Existing components, hooks and services** — file, export, purpose. This is the
-      reuse inventory; its value is that it is exhaustive.
-- [ ] **B.6 Design tokens** — actual token names from the `@theme` block. Note anything the
-      system lacks (radius scale? semantic colours?) so it gets raised rather than invented.
-- [ ] **B.7 Route handlers** — every route under `src/app/api/`, or "none".
-- [ ] **B.8 Known gaps and debt** — where the repo currently violates or cannot yet satisfy
-      Part A. State absences honestly so they aren't mistaken for things to quietly fill in.
-- [ ] **B.9 Repo conventions worth not breaking** — naming, path aliases, files that are
-      committed on purpose, generated artefacts that are gitignored.
+| Package | Version |
+|---|---|
+| next | 16.3.4 (App Router, Turbopack) |
+| react / react-dom | 19.2.8 / 19.2.8 |
+| typescript | 5.9.3 |
+| tailwindcss | 4.3.3 (v4 — `@theme` in globals.css, no JS config) |
+| @heroui/react | 3.2.4 |
+| @heroui/styles | 3.2.4 |
 
-Record the generation date at the top of Part B, and regenerate whenever the repo drifts.
+Pinned: `packageManager: npm@11.19.1`, `engines.node >=20`, `.nvmrc` → 24.14.0.
+
+**Declared in Part A but not installed (absent, on purpose — SETUP.md §10):** Supabase
+(client, auth, middleware), PostGIS, Mapbox GL JS, any data-fetching library, any model
+provider, any test runner.
+
+### B.2 Directory map
+
+```
+src/app/          layout.tsx (server, exports metadata+viewport), page.tsx, about/page.tsx,
+                  globals.css (imports + app shell + @theme), manifest.ts, favicon.ico
+src/components/   register-service-worker.tsx ("use client", registers /sw.js)
+public/           sw.js (installability-only fetch handler), icon-192/512/maskable PNGs,
+                  apple-touch-icon.png (180px), scaffold *.svg leftovers
+```
+
+Missing (first agent to need one should create it): `src/hooks/`, `src/services/`,
+`src/types/`, `docs/`, `src/app/api/`, `middleware.ts`.
+
+### B.3 Commands
+
+All observed 5 Sep 2026, exit codes as returned:
+
+| Script | Command | Exit | Notes |
+|---|---|---|---|
+| dev | `next dev` | 0 | serves on :3000 |
+| build | `next build` | 0 | routes: `/`, `/about`, `/manifest.webmanifest` |
+| lint | `eslint` | 0 | |
+| start | `next start` | 0 | used for the rendered-HTML checks |
+| — | `npx tsc --noEmit` | 0 | no `typecheck` script exists; run via npx |
+
+None destructive.
+
+### B.4 Schema summary
+
+**No database exists.** No Supabase client, no migrations, no schema. (Verified: nothing
+under `src/` references Supabase; SETUP.md §10 defers it.)
+
+### B.5 Existing components, hooks and services (reuse inventory)
+
+Exhaustive as of 5 Sep 2026:
+
+- `src/components/register-service-worker.tsx` — `RegisterServiceWorker`; client component, renders null, registers `/sw.js` once on mount.
+- No hooks, services, or types exist yet. `src/app/page.tsx` and `about/page.tsx` are the only pages; both `"use client"`.
+
+### B.6 Design tokens
+
+`@theme inline` block in `src/app/globals.css` contains **only** the two font mappings
+(`--font-sans`, `--font-mono` → next/font variables). It is deliberately unpopulated —
+no colour palette, no type scale, no radius scale. HeroUI v3 defaults stand until
+`docs/DESIGN.md` exists. Icon/manifest colours (`#ffffff`, `#1a1a1a`) are placeholders.
+
+### B.7 Route handlers
+
+**None.** `src/app/api/` does not exist.
+
+### B.8 Known gaps and debt
+
+- **SETUP.md §8 not done:** Vercel CLI logged out; deploy and the deploy gates are
+  unverified. `vercel login` is interactive — needs a human.
+- **§9 not done:** Windows clone verification is Ameer's, by design.
+- **Real-phone install unverified:** Lighthouse 12 has no installability category; the
+  manifest fields, icons, SW, and HTTPS-pending-on-deploy were verified directly. The
+  "installs on a real iPhone" gate remains open.
+- Branch is `master`, not `main` as SETUP.md assumes.
+- Client-side nav was proven via headless Chrome CDP (navigation entries stayed at 1
+  after clicking `/about`), not on a physical device.
+- `public/*.svg` scaffold leftovers are committed but unused.
+
+### B.9 Repo conventions worth not breaking
+
+- Branch: `master` (pushed to origin). Tags: `expo-archive` preserves the old Expo tree.
+- `package-lock.json` committed; `npm ci` clean from it (verified once).
+- `"use client"` on every component/page including `page.tsx` files; `layout.tsx` is the
+  only server component in `src/app/`.
+- Path alias `@/*` → `src/*`.
+- `CLAUDE.md` is a one-line pointer (`@AGENTS.md`) regenerated by `create-next-app`; keep it.
+- The `nextjs-agent-rules` block at the top of this file is rewritten by `next dev`;
+  commit it rather than deleting it.
+- `.gitignore` is the create-next-app default (`.next/`, `node_modules/` ignored).
 
 ---
 
