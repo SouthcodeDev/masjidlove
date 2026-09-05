@@ -18,21 +18,40 @@ MasjidLuv and does not.
 | File | Answers |
 |---|---|
 | **`AGENTS.md`** (this file) | **How to work here.** The rules, and a verified inventory of what's in the repo. |
+| `SETUP.md` | **How this repo gets built from empty.** The ordered setup procedure and its pass/fail checks. Authoritative until Part B is generated. |
 | `docs/ARCHITECTURE.md` | Where code goes, what each layer may import, a worked feature walkthrough. |
 | `docs/DATABASE.md` | Migration workflow, the RLS pattern, PostGIS conventions. |
+| `docs/DESIGN.md` | The HeroUI React component whitelist, token system, and anti-patterns. |
 | `STATUS.md` | **What to do next.** Current technical and product status, ordered next steps, open product decisions, the verification protocol. |
 
 Read this file first. Then `STATUS.md` to find out where the project actually stands before
 you pick up a task — it will tell you whether your task's prerequisites exist yet.
 
-> **Preserved rule — Expo has changed.** Expo SDK 57 differs substantially from older
-> versions, and model training data skews old. Read the exact versioned docs at
-> <https://docs.expo.dev/versions/v57.0.0/> before writing Expo code. Do not rely on
-> remembered API shapes.
->
-> *(This was the entire contents of the previous `AGENTS.md`. It is normative, so it
-> arguably belongs inside Part A §1 — left here as a callout rather than edited into
-> hand-written territory. Move it if you agree.)*
+---
+
+## ⚠️ Read the current docs, not your training data
+
+Every load-bearing library here shipped a major version recently enough that model training
+data skews to the *previous* one. These are the specific failure modes. All four have been
+observed in the wild.
+
+| Trap | Wrong (old) | Right (current) |
+|---|---|---|
+| **Tailwind v4 config** | `tailwind.config.js` with a `theme.extend` object | `@theme` inside the global stylesheet. There is no JS config file. |
+| **Tailwind v4 import** | `@tailwind base; @tailwind components; @tailwind utilities;` | `@import "tailwindcss";` |
+| **HeroUI** | `@nextui-org/react` + `NextUIProvider` + a `heroui()` Tailwind plugin | `@heroui/react` and `@heroui/styles`, two CSS imports, **no provider and no plugin**. NextUI is the old name of the v2 library — different API, different setup. |
+| **Next routing** | `pages/`, `getServerSideProps`, `next/router` | App Router under `src/app/`, `next/navigation` |
+
+Before writing code against any of these, open the versioned docs:
+
+- Next.js — <https://nextjs.org/docs>
+- Tailwind CSS v4 — <https://tailwindcss.com/docs>
+- HeroUI v3 — <https://heroui.com/en/docs/react/getting-started> (and `heroui.com/llms.txt`
+  for exact export names)
+- React Aria Components — <https://react-spectrum.adobe.com/react-aria/components.html>
+  (HeroUI is built on it; `isDisabled` / `onPress`, not `disabled` / `onClick`)
+
+Do not rely on remembered API shapes.
 
 ---
 
@@ -40,7 +59,7 @@ you pick up a task — it will tell you whether your task's prerequisites exist 
 
 ### Before you write code
 
-1. Read `docs/ARCHITECTURE.md` and `docs/DATABASE.md`.
+1. Read `docs/ARCHITECTURE.md` and `docs/DATABASE.md`. Read `docs/DESIGN.md` before any UI work.
 2. Inspect existing patterns in the codebase. Match them.
 3. Reuse existing components, hooks, services and types.
 4. **Never create a duplicate abstraction.** No `Button2`, `NewButton`, `EventCardFinal`.
@@ -53,14 +72,56 @@ you pick up a task — it will tell you whether your task's prerequisites exist 
 Committed. Do not propose alternatives, introduce a second framework, or reach for a
 different library because it would be faster for one task.
 
-- **App:** Expo + React Native + TypeScript, Expo Router for navigation
-- **Web:** the same codebase via React Native Web / Expo Web
-- **Backend:** Supabase — Postgres, Auth, Storage, Realtime, Edge Functions, RLS
+- **App:** Next.js (App Router) + React + TypeScript
+- **Styling:** Tailwind CSS v4
+- **Components:** HeroUI React (`@heroui/react`)
+- **Backend:** Supabase — Postgres, Auth, Storage, Realtime, RLS
 - **Geo:** PostGIS
-- **Maps:** Mapbox
-- **Builds:** Expo EAS (mobile), Vercel (web)
+- **Maps:** Mapbox GL JS
+- **Server-side work:** Next route handlers under `src/app/api/`
+- **Hosting:** Vercel
+- **Delivery:** installable PWA
 
 Exact versions live in Part B, derived from the manifest files — not here.
+
+### Closed decisions — do not reopen
+
+Recorded so you don't helpfully reintroduce something that was removed on purpose.
+
+- **This is a web application.** Not React Native, not Expo, not a native app. A previous
+  incarnation of this repo was an Expo project; it was deleted deliberately. Do not add
+  `expo`, `react-native`, `react-native-web`, `nativewind`, or EAS anything.
+- **HeroUI React, not HeroUI Native.** They are different libraries with different render
+  targets. HeroUI Native does not support web.
+- **Server-side model calls go in Next route handlers**, not Supabase Edge Functions. One
+  repo, one deploy target, one secret store. See the AI section for the constraint that
+  keeps this reversible.
+- **Mobile is still the target *shape*.** Cutting React Native did not make this a desktop
+  app. See the viewport rule below.
+
+### The client-component rule
+
+**Every component is a client component.** Put `"use client"` at the top of every file under
+`src/app/` and `src/components/`.
+
+Three exceptions, and only three:
+
+1. `src/app/layout.tsx` — stays a server component *solely* so it can export `metadata` and
+   `viewport`. It must contain no logic, no data fetching, and no state. Providers go in a
+   separate `"use client"` component that the layout renders.
+2. `src/app/api/**/route.ts` — route handlers. Server by definition.
+3. `middleware.ts` — Supabase session refresh.
+
+Forbidden: server actions, `async` components, data fetching in React Server Components,
+`server-only` imports anywhere outside the two server locations above.
+
+**Why.** This is Next used as "Vite with a free backend." The server/client split is the
+single most common source of agent-generated bugs — missing directives, hydration
+mismatches, server code pulled into a client tree. Deleting the split deletes the whole
+category. It also makes the app behave like a SPA, which is what a PWA needs.
+
+If you think a task genuinely requires a server component, say so and stop. Do not decide
+unilaterally.
 
 ### Architecture
 
@@ -70,18 +131,61 @@ Strict one-directional layering:
 UI  →  hooks  →  services  →  Supabase
 ```
 
-- UI components never query the database directly. No Supabase client calls in screens or
+- UI components never query the database directly. No Supabase client calls in pages or
   components.
-- Data access lives in `services/`. React state and data-fetching orchestration live in
-  `hooks/`.
-- Business logic goes in the shared layer, not in platform-specific screens.
+- Data access lives in `services/`. Every function there is a plain async function that
+  takes arguments and returns typed data. No React in this layer.
+- React state and data-fetching orchestration live in `hooks/`. Hooks call services.
+- Route files under `src/app/` are **thin**. A page composes components and renders them. It
+  holds no business logic.
+- Shared domain types live in `src/types/`. Services and hooks import from there; they don't
+  redeclare shapes inline.
 
-Target ~80% shared code (components, hooks, types, services, state, logic) and ~20%
-platform-specific surfaces. Do not scatter `Platform.OS` checks through shared code to force
-a single UI; if a screen genuinely needs to differ per platform, split the screen, not the
-logic.
+### Viewport and layout discipline
 
-Mobile is the primary product. Web is a secondary surface. Don't build desktop-first.
+The product is phone-shaped. This does not change because it now runs in a browser.
+
+- **Design and build at 390px wide.** That is the primary viewport.
+- Wider screens get a centred, max-width column — not a redesigned desktop layout, and not a
+  stretched mobile one.
+- **Interactive targets are at least 44px** in their smallest dimension.
+- Hover states may enhance, never inform. Anything discoverable only on hover is broken on
+  the primary device.
+- Verify every UI change at 390px **and** at desktop width before calling it done.
+
+### PWA and app shell
+
+The app must be installable to a phone home screen and must not feel like a web page once
+it is. This is a standing requirement, not a final polish step.
+
+- `manifest.json` with `"display": "standalone"`, theme colour, background colour, and the
+  full icon set. `apple-touch-icon` included — iOS ignores the manifest icons.
+- The app-shell stylesheet owns the defects that make web feel clunky. Do not solve these
+  ad hoc, per component:
+  - `dvh` units, never `vh` — `100vh` is wrong in mobile Safari
+  - `overscroll-behavior: none` on the scroll container
+  - `-webkit-tap-highlight-color: transparent`
+  - `user-select: none` on interactive chrome only, never on content
+  - fonts preloaded with `font-display: optional`
+- Navigation is client-side. A route change must never look like a document load.
+- **Verify installation on a real phone**, added to the home screen. Desktop devtools
+  emulation does not prove this.
+
+### Styling and design system
+
+- **HeroUI React first.** Check `docs/DESIGN.md` before building any component. If what you
+  need isn't in the whitelist, say so explicitly and propose — don't quietly hand-roll a
+  parallel component.
+- Tokens live in the `@theme` block of the global stylesheet. **No hex literals in
+  components.** No arbitrary values (`text-[13px]`, `bg-[#3c87f7]`) where a token exists; if
+  none exists, that's a design decision — raise it.
+- Respect `prefers-reduced-motion`. Keyboard focus must be visible; never remove an outline
+  without replacing it.
+- Motion that answers a user action is welcome. Ambient motion — fade-and-slide on every
+  section, hover transitions on every card — is not. It reads as generated.
+- Interface copy is design content. Sentence case, active voice, plain verbs. A button says
+  what happens ("Save changes", not "Submit"), and the action keeps its name through the
+  whole flow. Empty and error states say what to do next.
 
 ### Database
 
@@ -96,40 +200,47 @@ Mobile is the primary product. Web is a secondary surface. Don't build desktop-f
 
 ### Maps
 
-- Screens never touch the Mapbox SDK directly. All map usage goes through the shared map
-  component and its hooks, so platform differences and style config live in one place.
+- Components never touch the Mapbox SDK directly. All map usage goes through the shared map
+  component and its hooks, so style config and camera behaviour live in one place.
 - Map style URLs, marker styling and camera defaults are centralised config, not inline
-  literals scattered across screens.
+  literals scattered across components.
+- Mapbox GL JS must not be imported into the server bundle — it requires `window`. Load it
+  dynamically, client-side only.
 - Mapbox billing is per request. Do not refetch tiles, geocode or reverse-geocode on every
   render or keystroke — memoise, debounce, and cache. Treat an unnecessary map request the
   same way you'd treat an unnecessary model call.
 - Nearby/radius queries are PostGIS work. Do not fetch a wide set and filter by distance on
   the client.
-- Anything map-related must be verified on **both** native and web before you call it done.
-  Web parity is not assumed.
 
 ### Security
 
-- **Never expose the service-role key to the client.** Client uses the anon key only.
-- Secrets live exclusively in Edge Function environment variables. No API keys in the app
-  bundle, no keys in committed files, no keys in test fixtures.
+- **Only `NEXT_PUBLIC_*` environment variables reach the browser.** Everything else is
+  server-only. Naming a variable `NEXT_PUBLIC_` is a decision to publish it — treat it that
+  way.
+- Client uses the Supabase **anon key** only. The service-role key appears in route handlers
+  and nowhere else. Never in a component, a hook, or a service that a component imports.
+- Model provider API keys live in route handlers and Vercel environment variables. Never in
+  the bundle, never in a committed file, never in a test fixture.
 - Never weaken or bypass an RLS policy to make a feature work. If a policy blocks a
   legitimate flow, the policy needs changing deliberately — raise it.
+- `.env.example` is the committed template and holds placeholders only.
 
 ### AI features inside the product
 
-- **The app never calls a model provider directly.** All model calls go through a Supabase
-  Edge Function that authenticates, validates input, builds the prompt, calls the model and
-  validates the response.
-- **Name capabilities, not models.** `enrich-event`, not `call-<vendor>-<model>`. The
-  provider must be swappable without touching app code.
+- **The browser never calls a model provider directly.** All model calls go through a route
+  handler under `src/app/api/` that authenticates, validates input, builds the prompt, calls
+  the model, and validates the response.
+- **Name capabilities, not models.** `/api/enrich-event`, not `/api/call-<vendor>-<model>`.
+  The provider must be swappable without touching UI code. This naming is also what keeps
+  the route-handler decision reversible — moving a capability to an Edge Function later
+  should be a change of URL, nothing more.
 - **Always request structured output** against an explicit schema, then validate it before
   it reaches the database. Invalid response → retry, then fallback. Never write unvalidated
   model output to a table.
 - Prompts must instruct the model not to invent information and to return null for absent
   fields.
 - **Enrich on write, not on read.** One model call serves every subsequent viewer.
-- AI calls are asynchronous by default. Save the user's record immediately, queue the
+- AI calls are asynchronous by default. Save the user's record immediately, kick off the
   enrichment, surface a processing state in the UI.
 - The database does deterministic work; the model does semantic work only. **Do not let the
   model become the database.**
@@ -138,8 +249,8 @@ Mobile is the primary product. Web is a secondary surface. Don't build desktop-f
 
 - Send the minimum data necessary to any model. Never send location history, precise
   coordinates or personal identifiers when a filtered candidate list would do.
-- Default to the lowest location precision a feature can work with. Don't add background or
-  continuous location for a feature that doesn't require it.
+- Default to the lowest location precision a feature can work with. Browser geolocation is
+  a one-shot permission request at the point of need — don't request it on load.
 - Visibility of a record and visibility of a person's participation in it are separate
   permissions. Don't collapse them.
 
@@ -149,8 +260,11 @@ Run and report:
 
 - [ ] Typecheck
 - [ ] Lint
-- [ ] The affected functionality actually exercised (not just "should work") — on native
-      **and** web if the change touches shared code
+- [ ] **Production build** — `next build`. Dev mode hides errors that the build catches;
+      a passing dev server is not evidence.
+- [ ] The affected functionality actually exercised (not just "should work"), at 390px
+      and at desktop width
+- [ ] If you touched the manifest, service worker, or app shell: confirmed still installable
 - [ ] List of files changed, and any file you created that duplicates an existing concept
 
 Then state plainly what you did **not** do, and anything you changed that wasn't asked for.
@@ -159,6 +273,7 @@ Then state plainly what you did **not** do, and anything you changed that wasn't
 
 - "This needs a product decision" — say it, don't guess.
 - "This conflicts with the layering rule" — say it, don't route around it.
+- "This needs a server component" — say it, don't add one.
 - "I couldn't verify this works" — say it, don't imply success.
 - Adding features that weren't requested. Scope belongs to the humans.
 
@@ -169,6 +284,11 @@ Then state plainly what you did **not** do, and anything you changed that wasn't
 **What this is.** A community app for masjids: find a masjid, see jamaat times, see what's
 actually happening there, RSVP. Built as the laboratory for a larger real-world discovery
 platform — so the *patterns* here matter as much as the features.
+
+**It is also a rehearsal.** This repo is being built on the same stack, under the same
+constraints, as a timed hackathon build. Velocity and the reusability of what's produced are
+part of what's being measured. That is an argument for doing things the boring, repeatable
+way, not for cutting corners that would have to be undone.
 
 **Design with reuse in mind, without over-generalising.** Model events, places and
 memberships cleanly enough to carry over. Do not add abstraction layers for hypothetical
@@ -184,240 +304,42 @@ gamification, ticketing, check-ins, streaks, badges.
 
 ## Part B — Repo facts
 
-> Derived by inspecting the repository on **2026-09-02**. Every line below was verified
-> against a file that exists. Regenerate when the repo drifts.
+> **Status: NOT GENERATED. Nothing below has been verified.**
 >
-> Part A §1 step 1 points at `docs/ARCHITECTURE.md` and `docs/DATABASE.md` — both now exist.
-> Note that large parts of them are marked **[PATTERN]**: the shape the first implementation
-> must take, not a description of working code. `STATUS.md` §1 is the authority on what is
-> actually built.
+> The previous Part B described an Expo project that no longer exists. It has been removed
+> rather than adapted, because a Part B containing plausible-but-unverified facts is worse
+> than an empty one — an agent will trust it.
+>
+> **Do not populate this section by inference.** Every line must correspond to a file or
+> command output that was actually observed. Until then, `SETUP.md` is the authority on what
+> the repo should contain, and the repo itself is the authority on what it does contain.
 
-### B.1 Stack and versions
+### Generation checklist
 
-As declared in `package.json` / installed in `node_modules`. Nothing here is aspirational.
+Regenerate Part B by inspecting the repository, in this order. Each section states its
+evidence source. If a section can't be verified, write "unverified" — don't guess.
 
-| Thing | Version |
-|---|---|
-| Node | v24.14.0 (local) |
-| npm | 11.19.1 — pinned via `"packageManager"` in `package.json` |
-| expo | `~57.0.0` (installed 57.0.19) |
-| expo-router | `~57.0.18` |
-| react / react-dom | `19.2.3` |
-| react-native | `0.86.3` |
-| react-native-web | `~0.21.0` |
-| typescript | `~6.0.3` |
-| @types/react | `~19.2.2` |
-| eslint / eslint-config-expo | `^9.0.0` / `~57.0.2` |
-| react-native-reanimated | `4.5.1` (+ `react-native-worklets` `0.10.1`) |
+- [ ] **B.1 Stack and versions** — from `package.json` and installed `node_modules`. Node and
+      package-manager versions from the local environment. Mark anything declared in Part A
+      but **not installed** as absent, explicitly.
+- [ ] **B.2 Directory map** — from the actual tree. Note which directories are missing, and
+      say what the first agent to need one should do.
+- [ ] **B.3 Commands** — every script in `package.json`, run, with the exit code it actually
+      returned. Flag any that are destructive, and any that don't exist yet.
+- [ ] **B.4 Schema summary** — from the live Supabase schema via MCP, or "no database
+      exists" if there isn't one. Do not transcribe `docs/DATABASE.md`; that's the intent,
+      not the state.
+- [ ] **B.5 Existing components, hooks and services** — file, export, purpose. This is the
+      reuse inventory; its value is that it is exhaustive.
+- [ ] **B.6 Design tokens** — actual token names from the `@theme` block. Note anything the
+      system lacks (radius scale? semantic colours?) so it gets raised rather than invented.
+- [ ] **B.7 Route handlers** — every route under `src/app/api/`, or "none".
+- [ ] **B.8 Known gaps and debt** — where the repo currently violates or cannot yet satisfy
+      Part A. State absences honestly so they aren't mistaken for things to quietly fill in.
+- [ ] **B.9 Repo conventions worth not breaking** — naming, path aliases, files that are
+      committed on purpose, generated artefacts that are gitignored.
 
-Other Expo packages present: `@expo/ui`, `expo-constants`, `expo-dev-client`, `expo-device`,
-`expo-font`, `expo-glass-effect`, `expo-image`, `expo-linking`, `expo-splash-screen`,
-`expo-status-bar`, `expo-symbols`, `expo-system-ui`, `expo-web-browser`.
-Also `react-native-gesture-handler`, `react-native-safe-area-context`,
-`react-native-screens`.
-
-**Declared in Part A but NOT installed.** Do not `import` these — they are not dependencies
-yet. Adding one is a setup task, not an incidental step inside a feature:
-
-- `@supabase/supabase-js` — **absent**
-- Mapbox (any SDK) — **absent**
-- TanStack Query — **absent**
-- Any test runner — **absent**
-
-`app.json` config worth knowing: `scheme` is `masjidluv`, bundle id / package is
-`com.southcode.masjidlove`, `web.output` is `static`, and
-`experiments.typedRoutes` + `experiments.reactCompiler` are both **on**. Typed routes means
-route strings are type-checked against `.expo/types/router.d.ts` — currently `/`, `/explore`,
-`/_sitemap`.
-
-### B.2 Directory map
-
-```
-src/
-  app/            Expo Router routes. THIS is the router root — not /app.
-                    _layout.tsx   root layout: ThemeProvider + AppTabs + splash overlay
-                    index.tsx     "Home" tab   (Expo scaffold demo content)
-                    explore.tsx   "Explore" tab (Expo scaffold demo content)
-  components/     Presentational components. No data access.
-    ui/           Lower-level primitives (currently just collapsible.tsx)
-  constants/      theme.ts — the design tokens (see B.6)
-  hooks/          Colour-scheme and theme hooks only. No data hooks yet.
-  global.css      Web-only CSS custom properties (font stacks)
-types/            Committed ambient TS declarations (expo.d.ts). See B.9.
-assets/           images/ (incl. tabIcons/), expo.icon/
-scripts/          reset-project.js — DESTRUCTIVE, see B.3
-docs/             ARCHITECTURE.md, DATABASE.md
-.expo/            Generated by the dev server. Gitignored. Never edit or commit.
-dist/             Web export output. Gitignored. Never edit or commit.
-```
-
-**`services/` does not exist.** The layering rule in Part A has no destination yet — the
-first agent to need data access creates `src/services/`, and should say so explicitly rather
-than putting a query in a component.
-
-Path aliases (`tsconfig.json`): `@/*` → `./src/*`, and `@/assets/*` → `./assets/*`.
-Use them; the existing code does consistently.
-
-### B.3 Commands
-
-Verified to run. Exit codes are what they actually returned, not what they should return.
-
-| Command | What it does | State |
-|---|---|---|
-| `npm install` | Install deps | Clean; lockfile is deterministic under npm 11.19.1 |
-| `npm start` | `expo start` — dev server, pick platform | Works |
-| `npm run ios` / `android` / `web` | `expo start --<platform>` | Works |
-| `npm run typecheck` | `tsc --noEmit` | **Exit 0, clean** |
-| `npm run lint` | `expo lint` | **Exit 0, clean** |
-| `npx expo-doctor` | 21 dependency/config checks | 21/21 pass |
-| `npx expo export -p web` | Static web build → `dist/` | **Works** — static rendering, 4 routes. This is the Vercel build command. |
-| `npm run reset-project` | **DESTRUCTIVE.** Deletes or moves `src/` and `scripts/` to `example/` and writes a blank `src/app`. | Never run this. It exists only because `create-expo-app` shipped it. |
-
-**Commands that do NOT exist yet:** no test script, no `build` script wired for Vercel
-(the export command above works, but nothing in `package.json` or `vercel.json` invokes it),
-no migration commands (no Supabase CLI).
-
-**`npm run lint` needs two runs on a fresh clone.** The first invocation installs `eslint` +
-`eslint-config-expo`, writes `eslint.config.js`, then dies with `Cannot find module 'eslint'`
-because it can't resolve what it just installed in the same process. Run it again and it
-works. That is Expo CLI behaviour, not a repo bug — don't "fix" it.
-
-EAS build profiles exist in `eas.json` (`development` with `developmentClient: true`,
-`preview`, `production` with `autoIncrement`). EAS project id is set in `app.json`. The EAS
-CLI itself is **not** a dependency — invoke via `npx eas-cli`. No build has been run.
-
-### B.4 Schema summary
-
-**There is no database in this repository.** Verified: no `supabase/` directory, no
-`config.toml`, no `migrations/`, no `@supabase/supabase-js` dependency, and zero occurrences
-of `supabase.from(` or `@supabase/supabase-js` anywhere in `src/`.
-
-So there are no tables, no relationships, and no RLS policies to summarise — not "RLS is
-pending", but no schema at all. A Supabase cloud project reportedly exists outside the repo;
-nothing in the repo is linked to it.
-
-The first migration is a **human** task per the project's own setup notes, and it sets the
-pattern every later table copies. Do not generate it as a side effect of a feature request.
-When schema does exist, follow Part A: inspect the live schema via MCP rather than trusting
-this section.
-
-### B.5 Existing components, hooks and services
-
-The reusable inventory. Reuse these; don't recreate them.
-
-**Components** (`src/components/`)
-
-| File | Export | Purpose |
-|---|---|---|
-| `themed-text.tsx` | `ThemedText`, `ThemedTextProps` | Text with theme colour + a `type` variant. Variants: `default`, `title`, `small`, `smallBold`, `subtitle`, `link`, `linkPrimary`, `code`. **Use this instead of raw `<Text>`.** |
-| `themed-view.tsx` | `ThemedView`, `ThemedViewProps` | View with themed `backgroundColor` via `type`. **Use instead of raw `<View>`** where a background is wanted. |
-| `external-link.tsx` | `ExternalLink` | Link that opens in-app browser on native, new tab on web. |
-| `hint-row.tsx` | `HintRow` | Scaffold demo row. Delete when demo screens go. |
-| `app-tabs.tsx` / `.web.tsx` | `AppTabs` (default) | Bottom tabs. Native uses `NativeTabs` from `expo-router/unstable-native-tabs` — an **unstable** API surface; expect churn on SDK upgrade. |
-| `animated-icon.tsx` / `.web.tsx` | `AnimatedIcon`, `AnimatedSplashOverlay` | Splash/logo animation. Web variant imports `animated-icon.module.css` and renders a raw `<div>`. |
-| `web-badge.tsx` | `WebBadge` | Shows the installed Expo version. Scaffold decoration. |
-| `ui/collapsible.tsx` | `Collapsible` | Expand/collapse section using `expo-symbols` + Reanimated `FadeIn`. |
-
-**Hooks** (`src/hooks/`)
-
-| File | Export | Purpose |
-|---|---|---|
-| `use-theme.ts` | `useTheme()` | **The one you want.** Returns the resolved `Colors[light\|dark]` object. |
-| `use-color-scheme.ts` / `.web.ts` | `useColorScheme()` | Raw scheme. Web variant defers to `'light'` until hydration for static rendering, detected via `useSyncExternalStore` — **not** `setState` in an effect, which the lint config rejects. Copy that pattern if you need another hydration guard. |
-
-Note both `_layout.tsx` and `app-tabs.tsx` import `useColorScheme` straight from
-`react-native` and re-derive `Colors[...]` inline, rather than using `useTheme()`. That is
-existing inconsistency, not a pattern to copy — prefer `useTheme()`.
-
-**Services:** none. `src/services/` does not exist.
-
-**Shared types:** `ThemeColor` (from `constants/theme.ts`), `ThemedTextProps`,
-`ThemedViewProps`. There is no domain model yet — no `Masjid`, `Event`, `Profile` type
-anywhere.
-
-### B.6 Design tokens
-
-Actual names, from `src/constants/theme.ts`. Use these; do not introduce hex literals.
-
-- **`Colors.light` / `Colors.dark`** — keys: `text`, `background`, `backgroundElement`,
-  `backgroundSelected`, `textSecondary`. The `ThemeColor` type is these keys.
-  Access via `useTheme()`.
-- **`Spacing`** — `half: 2`, `one: 4`, `two: 8`, `three: 16`, `four: 24`, `five: 32`,
-  `six: 64`. Note these are **not** a 1-unit-per-4px scale at the low end; `half` is 2 and
-  `one` is 4. Read the value, don't assume.
-- **`Fonts`** — `sans`, `serif`, `rounded`, `mono`, resolved per platform via
-  `Platform.select`. On web these map to the CSS custom properties in `src/global.css`:
-  `--font-display`, `--font-serif`, `--font-rounded`, `--font-mono`.
-- **`BottomTabInset`** — `50` on iOS, `80` on Android, `0` elsewhere.
-- **`MaxContentWidth`** — `800`.
-
-There is **no** token for border radius, elevation, or semantic/brand colour. Radii mostly
-reuse `Spacing` values (`Spacing.two`/`three`/`four`/`five`), with two genuine literals:
-`40` in `animated-icon.tsx` and `12` in `ui/collapsible.tsx`. One hardcoded brand-ish colour
-exists: `#3c87f7` in `themed-text.tsx`'s `linkPrimary`. If you need a palette beyond the five
-neutral keys, that is a design decision — raise it rather than inventing hexes.
-
-`theme.ts` imports `@/global.css` as a side effect, which is how web gets the font variables.
-Don't remove that import.
-
-### B.7 Edge Functions
-
-**None.** No `supabase/functions/` directory, nothing deployed. `enrich-event` is named in
-Part A as the intended first capability; it does not exist. The Edge Function rules in Part A
-are therefore forward-looking constraints, not descriptions of running code.
-
-### B.8 Known gaps and debt
-
-Where the repo currently violates or cannot yet satisfy Part A. Stated honestly so you don't
-mistake absence for something you should quietly fill in. `STATUS.md` §1 tracks the same
-ground with dates and next actions; this list is the code-level view.
-
-1. **No `services/` layer**, so the central layering rule has no destination. The first
-   feature needing data access creates `src/services/` — and should say so explicitly rather
-   than putting a query in a component. Intended shape: `docs/ARCHITECTURE.md` §5.
-2. **No Supabase, no Mapbox, no TanStack Query** installed (B.1). Large parts of Part A —
-   Database, Maps, AI features — describe a system that does not exist yet. Do not import
-   these; adding one is a setup task, not a step inside a feature.
-3. **No schema at all** (B.4). Not "RLS pending" — no tables. The first migration is a human
-   task.
-4. **The app is still the `create-expo-app` scaffold.** `index.tsx` and `explore.tsx` are
-   template demo screens; `hint-row.tsx`, `web-badge.tsx`, and the `expo-logo` / `react-logo`
-   assets are template decoration. Nothing masjid-related has been built. `HintRow`'s default
-   text even says `app/index.tsx`, which is the wrong path for this repo (`src/app/index.tsx`).
-5. **`README.md` is untouched boilerplate** ("Welcome to your Expo app") and describes none of
-   this project.
-6. **Vercel is not wired.** `npx expo export -p web` works (B.3), but no `build` script and no
-   `vercel.json` invoke it, so the deploy path is unproven.
-7. **No test runner**, so "exercise the functionality" in the finishing gate means running the
-   app, not running tests.
-8. `NativeTabs` comes from `expo-router/unstable-native-tabs` — an explicitly unstable import
-   path. Expect churn on SDK upgrade.
-9. Two files bypass `useTheme()` and read `useColorScheme()` + `Colors` directly (B.5).
-10. **Nothing here has been verified on Ameer's machine** (Windows / Android). Every green
-    check in B.3 is macOS-only so far. See `STATUS.md` §4.1 — this is the cheapest
-    outstanding item and it gates trusting any of it.
-
-**Recently resolved** — recorded so you don't re-flag them: the fresh-clone typecheck failure
-(`types/expo.d.ts`), the scaffold's `set-state-in-effect` lint error, and the
-`package-lock.json` cross-machine churn. Details in `STATUS.md` §11.
-
-### B.9 Repo conventions worth not breaking
-
-- **File naming is kebab-case** for components and hooks (`themed-text.tsx`,
-  `use-color-scheme.ts`), with `PascalCase` exports. Match it.
-- **Platform splits use Expo's `.web.tsx` / `.web.ts` suffix**, not `Platform.OS` branching,
-  for whole-module differences: `animated-icon`, `app-tabs`, `use-color-scheme`. This is the
-  mechanism Part A's "split the screen, not the logic" rule expects. `Platform.select` is used
-  for *values* (tokens, insets) — that's fine.
-- **`types/expo.d.ts` is committed on purpose.** It holds
-  `/// <reference types="expo/types" />`, which supplies the CSS-module and global-CSS
-  declarations. Expo's CLI generates an equivalent `expo-env.d.ts` on `expo start`, but that
-  file is gitignored by design, so `tsc` failed on fresh clones without this. Do not delete
-  it, and do not "fix" it by committing `expo-env.d.ts`.
-- **`.env`**: only `EXPO_PUBLIC_*` values may reach the client. `.env.example` is the
-  committed template and must contain placeholders only. Secrets belong in Edge Function
-  secrets. See `STATUS.md` §8 for the verification protocol that enforces this.
-- **`.expo/`, `expo-env.d.ts`, `example/`** are gitignored generated artefacts.
+Record the generation date at the top of Part B, and regenerate whenever the repo drifts.
 
 ---
 
