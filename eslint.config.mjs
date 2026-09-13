@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Claude Design canvas runtime — reference tooling, not app code.
+    "support.js",
+    "image-slot.js",
   ]),
 ]);
 

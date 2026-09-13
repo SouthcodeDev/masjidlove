@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><script src="./image-slot.js"></script><style>
+:root{
+--white:#ffffff;--black:#0b0d0c;--snow:#f5f5f3;--eclipse:#14201c;
+--background:#ffffff;--foreground:#14201c;
+--surface:#f8f9f8;--surface-foreground:#14201c;
+--overlay:#ffffff;--overlay-foreground:#14201c;--backdrop:rgba(20,32,28,.42);
+--muted:#5e6b66;
+--default:#ecefed;--default-foreground:#14201c;
+--accent:#16603a;--accent-foreground:#ffffff;--accent-soft:#e6f0ea;--accent-soft-foreground:#0f4a2c;
+--secondary:#1d4b52;--secondary-foreground:#ffffff;
+--warning:#8a5a1e;--warning-foreground:#ffffff;--warning-soft:#f7edde;--warning-soft-foreground:#6a4415;
+--danger:#a3271f;--danger-foreground:#ffffff;--danger-soft:#f9e9e7;--danger-soft-foreground:#7c1d17;
+--border:#dfe3e1;--separator:#eaedeb;--focus:#16603a;--link:#1b5fc4;
+--radius:16px;--field-radius:12px;
+--surface-shadow:0 1px 2px rgba(20,32,28,.06);--field-shadow:0 1px 1px rgba(20,32,28,.04);
+}
+body{margin:0;background:var(--snow);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;color:var(--foreground);-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-decoration:none}a:hover{text-decoration:underline}
+</style></helmet>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="heart" viewBox="0 0 100 100"><path d="M50 91C50 91 9 58 9 34C9 16 25 8 37 14C47 19 50 30 50 36C50 30 53 19 63 14C75 8 91 16 91 34C91 58 50 91 50 91Z" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5V20h-5.5v-5.5h-5V20H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-map" viewBox="0 0 24 24"><path d="M12 21s6-6.4 6-10.2A6 6 0 0 0 6 10.8C6 14.6 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10.6" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 3.5v4M16 3.5v4M4 10.5h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.2" r="3.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 20c1.7-3.4 4.1-5.1 7-5.1s5.3 1.7 7 5.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M9.5 5.5l6.5 6.5-6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7.6v4.9l3.2 1.9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.6 15.6 20.5 20.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-dir" viewBox="0 0 24 24"><path d="M12 20V5M6.5 10.5 12 5l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.8 9.6 17.4 19 8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-q" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3v1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13 16.6h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4.2 20.8 19.8H3.2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 9.6v4.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12 16.8h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+<symbol id="i-off" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.6 17.4 17.4 6.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-cam" viewBox="0 0 24 24"><rect x="3.5" y="6.8" width="17" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13.3" r="3.3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M9 6.8l1.2-2.3h3.6L15 6.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><path d="M4 8.5h16M4 15.5h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9.5" cy="8.5" r="2.3" fill="var(--background)" stroke="currentColor" stroke-width="1.6"/><circle cx="15" cy="15.5" r="2.3" fill="var(--background)" stroke="currentColor" stroke-width="1.6"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M7 16.5V11a5 5 0 0 1 10 0v5.5h1.5v1.5H5.5v-1.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10.4 19.6a1.8 1.8 0 0 0 3.2 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6.5 4.5h11v16l-5.5-4.4-5.5 4.4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-loc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 7.5 12 13l7.5-5.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+<symbol id="i-apple" viewBox="0 0 24 24"><path d="M16.2 12.6c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.6.8-3.3.8-.7 0-1.7-.8-2.9-.8-1.5 0-2.9.9-3.7 2.3-1.6 2.7-.4 6.7 1.1 8.9.8 1.1 1.6 2.2 2.8 2.2 1.1 0 1.6-.7 3-.7s1.8.7 3 .7c1.2 0 2-1.1 2.8-2.2.6-.9.9-1.7 1.1-2.2-2.5-.9-2.6-3.9-2.6-4z" fill="currentColor"/><path d="M14.4 6.1c.6-.7 1-1.7.9-2.7-.9.1-1.9.6-2.5 1.3-.5.6-1 1.6-.9 2.6 1 .1 2-.5 2.5-1.2z" fill="currentColor"/></symbol>
+<symbol id="i-google" viewBox="0 0 24 24"><path d="M21 12.2c0-.7-.1-1.3-.2-1.9H12v3.6h5c-.2 1.2-.9 2.2-1.9 2.9v2.4h3.1C19.9 17.5 21 15.1 21 12.2z" fill="currentColor"/><path d="M12 21.5c2.4 0 4.5-.8 6-2.2l-3.1-2.4c-.8.6-1.8.9-2.9.9-2.3 0-4.2-1.5-4.9-3.6H4v2.5C5.5 19.6 8.5 21.5 12 21.5z" fill="currentColor"/><path d="M7.1 14.2c-.2-.6-.3-1.2-.3-1.9s.1-1.3.3-1.9V7.9H4C3.4 9.2 3 10.6 3 12.3s.4 3.1 1 4.4l3.1-2.5z" fill="currentColor"/><path d="M12 6.8c1.3 0 2.5.5 3.4 1.3l2.7-2.7C16.5 3.9 14.4 3 12 3 8.5 3 5.5 4.9 4 7.9l3.1 2.5C7.8 8.3 9.7 6.8 12 6.8z" fill="currentColor"/></symbol>
+<symbol id="i-fb" viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.7-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12z" fill="currentColor"/></symbol>
+<symbol id="i-people" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.2 19.5c1.3-3 3.4-4.5 5.8-4.5s4.5 1.5 5.8 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 5.6a3.2 3.2 0 0 1 0 5.8M17.4 15.4c1.4.7 2.5 2 3.4 4.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+<symbol id="i-admin" viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 19.6c1.2-3.1 3.4-4.7 6.4-4.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="16.8" cy="16.8" r="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M16.8 12.6v1.2M16.8 19.8v1.2M12.6 16.8h1.2M19.8 16.8h1.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<div style="max-width:100%;padding:48px 48px 32px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+<span style="color:var(--accent);display:flex"><svg width="34" height="34"><use href="#heart"/></svg></span>
+<div style="font-size:36px;font-weight:700;letter-spacing:-.025em">MasjidLove</div>
+<div style="font-size:15px;color:var(--muted);max-width:420px;line-height:1.5">App spec v2 · 393 × 852 · <b style="color:var(--foreground);font-weight:600">HeroUI v3 for React (web)</b> + Next.js · light theme</div>
+</div>
+<div style="display:flex;gap:20px;flex-wrap:wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--muted)">
+<span><span style="display:inline-block;width:10px;height:10px;background:var(--accent);border-radius:2px;vertical-align:-1px"></span> accent #16603a</span>
+<span><span style="display:inline-block;width:10px;height:10px;background:var(--secondary);border-radius:2px;vertical-align:-1px"></span> secondary #1d4b52</span>
+<span><span style="display:inline-block;width:10px;height:10px;background:var(--link);border-radius:2px;vertical-align:-1px"></span> link #1b5fc4</span>
+<span>radius 16 / field 12</span>
+<span>font system</span>
+<span>salah Fajr · Dhuhr · Asr · Maghrib · Isha</span>
+</div>
+<div style="display:flex;gap:32px;flex-wrap:wrap;padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:16px;font-size:13.5px;line-height:1.6;max-width:1180px">
+<div style="flex:1;min-width:300px"><div style="font-weight:600;margin-bottom:6px">What changed from v1 — read this first</div><div style="color:var(--muted);text-wrap:pretty">The target moved from <b style="color:var(--foreground);font-weight:500">HeroUI Native</b> to <b style="color:var(--foreground);font-weight:500">HeroUI v3 for React</b>, so DESIGN.md §3–§4 no longer describe the available set. Three things v1 had to hand-build now ship in the library: <b style="color:var(--foreground);font-weight:500">Table</b>, <b style="color:var(--foreground);font-weight:500">TimeField</b> and <b style="color:var(--foreground);font-weight:500">DatePicker</b>. Every annotation below uses real v3 export names and the compound <code style="font-family:ui-monospace,Menlo,monospace">Card.Header</code> / <code style="font-family:ui-monospace,Menlo,monospace">ListBox.Item</code> dot notation.</div></div>
+<div style="flex:1;min-width:300px"><div style="font-weight:600;margin-bottom:6px">Brand now comes from your screens</div><div style="color:var(--muted);text-wrap:pretty">Your mockups are green, so green it is — the original “avoid green” note in the brief is overridden by your own designs. Name is <b style="color:var(--foreground);font-weight:500">MasjidLove</b>. Deep green is the accent, your dark teal maps to HeroUI’s <code style="font-family:ui-monospace,Menlo,monospace">variant="secondary"</code>, and the blue from your “Forgot Password?” link becomes <code style="font-family:ui-monospace,Menlo,monospace">--link</code>. Because the accent is green, <b style="color:var(--foreground);font-weight:500">there is no separate success colour</b> — a green “confirmed” chip next to a green accent carries no information. Confirmed states use <code style="font-family:ui-monospace,Menlo,monospace">--accent-soft</code>.</div></div>
+<div style="flex:1;min-width:300px"><div style="font-weight:600;margin-bottom:6px">Emphasis moved to events</div><div style="color:var(--muted);text-wrap:pretty">Jamaat times are now a single quiet line at the top of Home with a link to the full week; the screen’s weight sits on event cards with real imagery. The 96px countdown from v1 is gone. Times remain fully available — one tap away, and still the whole of screens 15 and 19 — they just stopped being the thing you see first.</div></div>
+</div>
+</div>
+
+<!-- ═══════════ ONBOARDING ═══════════ -->
+<section data-screen-label="Onboarding" style="padding:32px 48px 48px;border-top:1px solid var(--border)">
+<div style="font-size:22px;font-weight:600;margin-bottom:6px">Onboarding — 11 screens</div>
+<div style="font-size:14px;color:var(--muted);max-width:760px;line-height:1.55;margin-bottom:32px;text-wrap:pretty">Your four screens re-imagined in HeroUI v3, plus four that the flow needs to actually work: email verification, masjid picking, notification choice, and a close. No carousel — every screen either collects something or grants something.</div>
+<div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
+
+<!-- 01 WELCOME -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--eclipse);color:var(--white);padding:3px 7px;border-radius:5px">01</span><span style="font-size:15px;font-weight:600">Welcome</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="display:flex;gap:5px;align-items:center"><span style="width:17px;height:10px;border:1px solid var(--foreground);border-radius:2px"></span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></span></div>
+<div style="flex:1;display:flex;flex-direction:column">
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding-bottom:24px"><span style="color:var(--accent);display:flex"><svg width="150" height="150"><use href="#heart"/></svg></span></div>
+  <svg viewBox="0 0 393 90" style="width:100%;height:90px;flex:none;display:block"><path d="M0 62 C 80 6 150 78 236 56 C 310 37 360 14 393 26" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round"/></svg>
+  <div style="padding:8px 24px 24px;display:flex;flex-direction:column;gap:12px;align-items:center">
+    <div style="font-size:32px;font-weight:700;letter-spacing:-.02em">MasjidLove</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.5;text-align:center;max-width:300px;text-wrap:pretty">Events and salah for the masjids around you, kept current by the masjids themselves.</div>
+  </div>
+  <div style="padding:0 24px 32px;display:flex;flex-direction:column;gap:12px">
+    <div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Sign up</div>
+    <div style="height:54px;border-radius:12px;background:var(--secondary);color:var(--secondary-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Log in</div>
+  </div>
+</div>
+<div style="height:34px;flex:none"></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> mark + wave → inline SVG · <code>Typography</code> h1 + body · <code>Button variant="primary" size="lg" fullWidth</code> · <code>Button variant="secondary" size="lg" fullWidth</code></div>
+<div><b style="color:var(--foreground)">TOKENS</b> 2 type sizes (32 / 16). Your teal is <code>variant="secondary"</code>, not a second accent — it never carries state. Buttons 54pt, 12pt apart.</div>
+<div><b style="color:var(--foreground)">GAPS</b> the wave and heart are brand art, not components — ship as one optimised SVG from your design file rather than the approximation drawn here.</div>
+</div>
+</div>
+
+<!-- 02 CONTINUE WITH -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--eclipse);color:var(--white);padding:3px 7px;border-radius:5px">02</span><span style="font-size:15px;font-weight:600">Continue with…</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:none;height:44px;padding:0 16px;display:flex;align-items:center"><span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24"><use href="#i-back"/></svg></span></div>
+<div style="flex:1;padding:0 24px;display:flex;flex-direction:column;justify-content:center;gap:40px;padding-bottom:60px">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+    <span style="color:var(--accent);display:flex"><svg width="76" height="76"><use href="#heart"/></svg></span>
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em">Create your account</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.5;text-align:center;max-width:290px;text-wrap:pretty">One account, all your masjids. Nothing is shared without you choosing to.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:500"><svg width="20" height="20"><use href="#i-mail"/></svg>Continue with email</div>
+    <div style="height:54px;border-radius:12px;background:var(--secondary);color:var(--secondary-foreground);display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:500"><svg width="20" height="20"><use href="#i-apple"/></svg>Continue with Apple</div>
+    <div style="height:54px;border-radius:12px;background:var(--secondary);color:var(--secondary-foreground);display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:500"><svg width="20" height="20"><use href="#i-google"/></svg>Continue with Google</div>
+    <div style="height:54px;border-radius:12px;background:var(--secondary);color:var(--secondary-foreground);display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;font-weight:500"><svg width="20" height="20"><use href="#i-fb"/></svg>Continue with Facebook</div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+    <span style="font-size:14px;color:var(--muted)">Already have an account?</span>
+    <span style="font-size:16px;font-weight:600;color:var(--link)">Log in</span>
+  </div>
+</div>
+<div style="flex:none;padding:0 24px 24px"><div style="font-size:12px;color:var(--muted);line-height:1.5;text-align:center">By continuing you agree to the <span style="color:var(--link)">terms</span> and <span style="color:var(--link)">privacy notice</span>.</div></div>
+<div style="height:34px;flex:none"></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> back → <code>Button isIconOnly variant="ghost"</code> (<code>aria-label="Back"</code>) · four <code>Button size="lg" fullWidth</code> with leading brand marks — this is HeroUI’s documented Social Buttons pattern · <code>Link</code> ×3</div>
+<div><b style="color:var(--foreground)">TOKENS</b> only email is <code>primary</code>; the three federated options are <code>secondary</code> so the recommended path is unambiguous. 3 type sizes (28 / 16 / 14 + 12 legal).</div>
+<div><b style="color:var(--foreground)">GAPS</b> none. Apple / Google / Facebook marks are vendor assets — use their official SVGs, not redrawn paths, or you fail their brand review.</div>
+</div>
+</div>
+
+<!-- 03 LOG IN -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--eclipse);color:var(--white);padding:3px 7px;border-radius:5px">03</span><span style="font-size:15px;font-weight:600">Log in</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:none;height:44px;padding:0 16px;display:flex;align-items:center"><span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24"><use href="#i-back"/></svg></span></div>
+<div style="flex:1;padding:0 24px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:8px">
+    <span style="color:var(--accent);display:flex"><svg width="64" height="64"><use href="#heart"/></svg></span>
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em">Welcome back</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:14px;font-weight:500">Email address</div>
+      <div style="height:52px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;padding:0 16px;font-size:16px">yusuf.adams@gmail.com</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:14px;font-weight:500">Password</div>
+      <div style="height:52px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:16px;letter-spacing:.14em">•••••••••••<span style="font-size:14px;letter-spacing:0;color:var(--link);font-weight:500">Show</span></div>
+      <div style="display:flex;justify-content:flex-end"><span style="font-size:14px;color:var(--link);font-weight:500">Forgot password?</span></div>
+    </div>
+    <div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Log in</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px"><div style="flex:1;height:1px;background:var(--separator)"></div><span style="font-size:13px;color:var(--muted)">or</span><div style="flex:1;height:1px;background:var(--separator)"></div></div>
+  <div style="display:flex;gap:12px">
+    <div style="flex:1;height:52px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:500"><svg width="20" height="20"><use href="#i-google"/></svg>Google</div>
+    <div style="flex:1;height:52px;border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:500"><svg width="20" height="20"><use href="#i-apple"/></svg>Apple</div>
+  </div>
+  <div style="display:flex;justify-content:center;gap:6px;font-size:14px"><span style="color:var(--muted)">New here?</span><span style="color:var(--link);font-weight:600">Create an account</span></div>
+</div>
+<div style="height:34px;flex:none"></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> both fields → <code>TextField</code> = <code>Label</code> + <code>Input</code> · Show → <code>InputGroup</code> end addon holding a <code>Button variant="ghost" size="sm"</code> · <code>Separator</code> with label · <code>Button variant="outline"</code> ×2 · <code>Link</code> ×3</div>
+<div><b style="color:var(--foreground)">TOKENS</b> here the federated options drop to <code>outline</code>, not <code>secondary</code> — a returning user’s known path is the password, so the alternatives recede further than on 02. 3 type sizes (28 / 16 / 14).</div>
+<div><b style="color:var(--foreground)">GAPS</b> none. Wrong-password state = <code>FieldError</code> under the password field plus <code>Input</code>’s invalid border; never a red banner alone.</div>
+</div>
+</div>
+
+<!-- 04 CREATE ACCOUNT -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--eclipse);color:var(--white);padding:3px 7px;border-radius:5px">04</span><span style="font-size:15px;font-weight:600">Create account</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:none;height:44px;padding:0 16px;display:flex;align-items:center"><span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24"><use href="#i-back"/></svg></span></div>
+<div style="flex:1;padding:0 24px;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;flex-direction:column;gap:8px;padding-top:8px">
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em">Create your account</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.5">Takes about a minute.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:14px;font-weight:500">Your name</div>
+      <div style="height:52px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;padding:0 16px;font-size:16px">Yusuf Adams</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:14px;font-weight:500">Email address</div>
+      <div style="height:52px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;padding:0 16px;font-size:16px">yusuf.adams@gmail.com</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:14px;font-weight:500">Password</div>
+      <div style="height:52px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:16px;letter-spacing:.14em">••••••••••<span style="font-size:14px;letter-spacing:0;color:var(--link);font-weight:500">Show</span></div>
+      <div style="font-size:13px;color:var(--muted)">At least 8 characters.</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:flex-start">
+    <span style="width:24px;height:24px;border-radius:7px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="17" height="17"><use href="#i-check"/></svg></span>
+    <span style="font-size:14px;line-height:1.5;text-wrap:pretty">Email me when a masjid I follow posts an event or changes a jamaat time.</span>
+  </div>
+  <div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Create account</div>
+</div>
+<div style="height:34px;flex:none"></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> wrap the three fields in one <code>Form</code> · <code>TextField</code> ×3 (the third adds <code>Description</code>) · <code>Checkbox</code> · <code>Button variant="primary" size="lg" fullWidth</code>, <code>isPending</code> while submitting</div>
+<div><b style="color:var(--foreground)">TOKENS</b> 24pt <code>Checkbox</code> box but a 44pt row target — the label is part of the hit area. Password rule sits in <code>Description</code> before the user types, and is replaced by <code>FieldError</code> only after a failed submit.</div>
+<div><b style="color:var(--foreground)">GAPS</b> none.</div>
+</div>
+</div>
+
+<!-- 05 VERIFY -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--accent);color:var(--accent-foreground);padding:3px 7px;border-radius:5px">05</span><span style="font-size:15px;font-weight:600">Verify email</span><span style="font-size:12px;color:var(--muted)">new</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:none;height:44px;padding:0 16px;display:flex;align-items:center"><span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24"><use href="#i-back"/></svg></span></div>
+<div style="flex:1;padding:0 24px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;flex-direction:column;gap:12px;padding-top:8px">
+    <span style="color:var(--accent);display:flex"><svg width="40" height="40"><use href="#i-mail"/></svg></span>
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15">Check your email</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.5;text-wrap:pretty">We sent a 6-digit code to <span style="color:var(--foreground);font-weight:500">yusuf.adams@gmail.com</span>. Enter it below.</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <div style="flex:1;height:60px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums">4</div>
+    <div style="flex:1;height:60px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums">1</div>
+    <div style="flex:1;height:60px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums">8</div>
+    <div style="flex:1;height:60px;border:2px solid var(--focus);border-radius:12px;display:flex;align-items:center;justify-content:center"><span style="width:2px;height:26px;background:var(--foreground)"></span></div>
+    <div style="flex:1;height:60px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow)"></div>
+    <div style="flex:1;height:60px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow)"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div style="height:54px;border-radius:12px;background:var(--default);color:var(--default-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;opacity:.5">Verify</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:14px"><span style="color:var(--muted)">Didn’t get it?</span><span style="color:var(--link);font-weight:500">Send again</span><span style="color:var(--muted)">in 0:42</span></div>
+  </div>
+</div>
+<div style="height:34px;flex:none"></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> <code>InputOTP</code> (length 6) · <code>Button</code> primary <code>isDisabled</code> until 6 digits · <code>Link isDisabled</code> during cooldown · <code>Typography</code></div>
+<div><b style="color:var(--foreground)">TOKENS</b> focused cell takes the 2px <code>--focus</code> ring; unfocused cells keep <code>--field-shadow</code>. Disabled Verify holds 3:1 — the countdown text says why it’s disabled, so the state is never colour-only.</div>
+<div><b style="color:var(--foreground)">GAPS</b> none — <code>InputOTP</code> is a real v3 export. Autofill from the SMS/email autofill token should submit on the sixth digit without a Verify tap.</div>
+</div>
+</div>
+
+<!-- 06 ROLE -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--eclipse);color:var(--white);padding:3px 7px;border-radius:5px">06</span><span style="font-size:15px;font-weight:600">How will you use it</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:1;padding:24px 24px 0;display:flex;flex-direction:column;gap:40px">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:38px;font-weight:700;letter-spacing:-.03em;line-height:1.05">Asalamu<br>Alaykum</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.5">How are you planning to use MasjidLove?</div>
+  </div>
+  <div style="display:flex;gap:12px">
+    <div style="flex:1;border:1px solid var(--border);border-radius:16px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;background:var(--background)">
+      <span style="color:var(--muted);display:flex"><svg width="36" height="36"><use href="#i-people"/></svg></span>
+      <div style="font-size:18px;font-weight:600">Community</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.45">Find masjids near you, see what’s on and RSVP to events</div>
+    </div>
+    <div style="flex:1;border:2px solid var(--accent);border-radius:16px;padding:20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;background:var(--accent-soft);position:relative">
+      <span style="position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:7px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center"><svg width="17" height="17"><use href="#i-check"/></svg></span>
+      <span style="color:var(--accent-soft-foreground);display:flex"><svg width="36" height="36"><use href="#i-admin"/></svg></span>
+      <div style="font-size:18px;font-weight:600;color:var(--accent-soft-foreground)">Masjid admin</div>
+      <div style="font-size:13px;color:var(--accent-soft-foreground);line-height:1.45">Post events and keep your masjid’s times up to date</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px">
+    <span style="color:var(--muted);display:flex;flex:none;margin-top:1px"><svg width="20" height="20"><use href="#i-q"/></svg></span>
+    <span style="font-size:13.5px;color:var(--muted);line-height:1.5;text-wrap:pretty">Admin access is confirmed with your masjid before you can publish anything. You can start as community and ask later.</span>
+  </div>
+</div>
+<div style="flex:none;padding:0 24px 34px"><div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Get started</div></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> the pair → <code>RadioGroup</code> with two custom-rendered <code>Radio</code>s (card layout via the <code>render</code> prop), <b style="color:var(--foreground)">not</b> two <code>Card</code>s + a <code>Checkbox</code> · note → <code>Alert variant="neutral"</code> · <code>Button</code> primary</div>
+<div><b style="color:var(--foreground)">TOKENS</b> selection carries three signals: 2px <code>--accent</code> border, <code>--accent-soft</code> fill, and the corner check. Your mock used a checkbox — swapped because this is one exclusive value, and a checkbox implies you could pick both.</div>
+<div><b style="color:var(--foreground)">GAPS</b> none. Renamed “User” → “Community”: nobody self-identifies as a user, and the honest contrast is community vs admin.</div>
+</div>
+</div>
+
+<!-- 07 PROFILE SETUP -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--eclipse);color:var(--white);padding:3px 7px;border-radius:5px">07</span><span style="font-size:15px;font-weight:600">Profile setup</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:none;height:44px;padding:0 16px;display:flex;align-items:center;justify-content:space-between"><span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24"><use href="#i-back"/></svg></span><span style="font-size:15px;color:var(--muted);font-weight:500">Step 1 of 3</span></div>
+<div style="flex:1;padding:0 24px;display:flex;flex-direction:column;gap:32px">
+  <div style="display:flex;flex-direction:column;gap:8px;padding-top:8px">
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em">Say salaam</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.5">This is what people see when you RSVP to an event.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+    <div style="width:96px;height:96px;border-radius:48px;background:var(--default);color:var(--muted);display:flex;align-items:center;justify-content:center;position:relative">
+      <svg width="34" height="34"><use href="#i-cam"/></svg>
+      <span style="position:absolute;bottom:-2px;right:-2px;width:34px;height:34px;border-radius:17px;background:var(--accent);color:var(--accent-foreground);border:3px solid var(--background);display:flex;align-items:center;justify-content:center"><svg width="17" height="17"><use href="#i-cam"/></svg></span>
+    </div>
+    <div style="font-size:14px;color:var(--muted)">Add a photo — optional</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:14px;font-weight:500">Your name</div>
+      <div style="height:52px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;padding:0 16px;font-size:16px">Yusuf Adams</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:14px;font-weight:500">Your area <span style="color:var(--muted);font-weight:400">— optional</span></div>
+      <div style="height:52px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:16px"><span>Gatesville</span><span style="color:var(--muted);display:flex;transform:rotate(90deg)"><svg width="18" height="18"><use href="#i-chev"/></svg></span></div>
+      <div style="font-size:13px;color:var(--muted)">Helps us suggest masjids even without location.</div>
+    </div>
+  </div>
+</div>
+<div style="flex:none;padding:0 24px 34px"><div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Continue</div></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> avatar → <code>Avatar size="lg"</code> with fallback icon, wrapped in <code>Button variant="ghost"</code>; the corner badge is <code>Badge</code> · <code>TextField</code> · <code>Select</code> (Cape Town areas) + <code>Description</code> · <code>Button</code> primary</div>
+<div><b style="color:var(--foreground)">TOKENS</b> “Step 1 of 3” is plain <code>Typography</code>, not a <code>ProgressBar</code> — three steps don’t need a bar, and words survive a screen reader better. 3 type sizes (28 / 16 / 14 + 13 helper).</div>
+<div><b style="color:var(--foreground)">GAPS</b> none. Area is optional and offered as a fallback so screen 08 can be declined without dead-ending — which is exactly what state 21d shows.</div>
+</div>
+</div>
+
+<!-- 08 LOCATION -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--eclipse);color:var(--white);padding:3px 7px;border-radius:5px">08</span><span style="font-size:15px;font-weight:600">Location permission</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:none;height:44px;padding:0 16px;display:flex;align-items:center;justify-content:space-between"><span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24"><use href="#i-back"/></svg></span><span style="font-size:15px;color:var(--muted);font-weight:500">Step 2 of 3</span></div>
+<div style="flex:1;padding:0 24px;display:flex;flex-direction:column;justify-content:center;gap:32px;padding-bottom:40px">
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <span style="width:64px;height:64px;border-radius:20px;background:var(--accent-soft);color:var(--accent-soft-foreground);display:flex;align-items:center;justify-content:center"><svg width="32" height="32"><use href="#i-loc"/></svg></span>
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15">Masjids near you</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.55;text-wrap:pretty">Turn on location and we’ll sort masjids by how far you’d have to walk, so the closest jamaat is always first.</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 16px">
+    <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--accent);display:flex;flex:none;margin-top:2px"><svg width="20" height="20"><use href="#i-check"/></svg></span><span style="font-size:14.5px;line-height:1.5">Used only while the app is open</span></div>
+    <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--accent);display:flex;flex:none;margin-top:2px"><svg width="20" height="20"><use href="#i-check"/></svg></span><span style="font-size:14.5px;line-height:1.5">Never stored on our servers</span></div>
+    <div style="display:flex;gap:12px;align-items:flex-start"><span style="color:var(--accent);display:flex;flex:none;margin-top:2px"><svg width="20" height="20"><use href="#i-check"/></svg></span><span style="font-size:14.5px;line-height:1.5">Never shared with the masjids or anyone else</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Allow location</div>
+    <div style="height:48px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Not now — I’ll pick by area</div>
+  </div>
+</div>
+<div style="height:34px;flex:none"></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> promise list → <code>Surface</code> + three rows of <code>Typography</code> + icon (not a <code>ListBox</code> — nothing here is selectable) · <code>Button</code> primary + <code>Button variant="ghost"</code></div>
+<div><b style="color:var(--foreground)">TOKENS</b> the icon tile is the only <code>--accent-soft</code> block on the screen, so the eye lands on the subject before the copy. Decline is a real 48pt button, not fine print.</div>
+<div><b style="color:var(--foreground)">GAPS</b> none. This is the pre-prompt; the OS dialog follows and isn’t ours to style. Denied → screen 21d.</div>
+</div>
+</div>
+
+<!-- 09 PICK MASJID -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--accent);color:var(--accent-foreground);padding:3px 7px;border-radius:5px">09</span><span style="font-size:15px;font-weight:600">Follow your masjids</span><span style="font-size:12px;color:var(--muted)">new</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:none;height:44px;padding:0 16px;display:flex;align-items:center;justify-content:space-between"><span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24"><use href="#i-back"/></svg></span><span style="font-size:15px;color:var(--muted);font-weight:500">Step 3 of 3</span></div>
+<div style="flex:1;padding:0 16px;display:flex;flex-direction:column;gap:20px;overflow:hidden">
+  <div style="display:flex;flex-direction:column;gap:8px;padding:8px 8px 0">
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em">Pick your masjids</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.5">Follow as many as you like. Their events and times land on your Home.</div>
+  </div>
+  <div style="height:52px;border:1px solid var(--border);border-radius:12px;box-shadow:var(--field-shadow);display:flex;align-items:center;gap:10px;padding:0 16px"><span style="color:var(--muted);display:flex"><svg width="20" height="20"><use href="#i-search"/></svg></span><span style="font-size:16px;color:var(--muted)">Search masjid or area</span></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font-size:13.5px;font-weight:500;color:var(--muted);padding-left:4px">Closest to you</div>
+    <div style="border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface)">
+      <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;background:var(--accent-soft)">
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:600;color:var(--accent-soft-foreground)">Masjidul Quds</span><span style="font-size:13px;color:var(--accent-soft-foreground)">Gatesville · 650 m · 3 events this week</span></div>
+        <span style="width:28px;height:28px;border-radius:9px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19"><use href="#i-check"/></svg></span>
+      </div>
+      <div style="height:1px;background:var(--separator)"></div>
+      <div style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:500">Habibia Masjid</span><span style="font-size:13px;color:var(--muted)">Rylands · 1.1 km · 1 event this week</span></div>
+        <span style="width:28px;height:28px;border-radius:9px;border:1.5px solid var(--border);flex:none"></span>
+      </div>
+      <div style="height:1px;background:var(--separator)"></div>
+      <div style="padding:14px 16px;display:flex;align-items:center;gap:12px;background:var(--accent-soft)">
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:600;color:var(--accent-soft-foreground)">Masjidus Sunni</span><span style="font-size:13px;color:var(--accent-soft-foreground)">Rylands · 1.4 km · 2 events this week</span></div>
+        <span style="width:28px;height:28px;border-radius:9px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19"><use href="#i-check"/></svg></span>
+      </div>
+      <div style="height:1px;background:var(--separator)"></div>
+      <div style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:500">Zeenatul Islam Masjid</span><span style="font-size:13px;color:var(--muted)">District Six · 4.6 km</span></div>
+        <span style="width:28px;height:28px;border-radius:9px;border:1.5px solid var(--border);flex:none"></span>
+      </div>
+      <div style="height:1px;background:var(--separator)"></div>
+      <div style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:16px;font-weight:500">Masjidul Jamiah</span><span style="font-size:13px;color:var(--muted)">Mowbray · 5.2 km</span></div>
+        <span style="width:28px;height:28px;border-radius:9px;border:1.5px solid var(--border);flex:none"></span>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:flex-start;padding:0 4px">
+    <span style="color:var(--muted);display:flex;flex:none;margin-top:1px"><svg width="18" height="18"><use href="#i-bookmark"/></svg></span>
+    <span style="font-size:13px;color:var(--muted);line-height:1.5">Your first pick becomes your home masjid. You can change it any time.</span>
+  </div>
+</div>
+<div style="flex:none;border-top:1px solid var(--separator);padding:14px 16px 34px;display:flex;flex-direction:column;gap:8px">
+  <div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Follow 2 masjids</div>
+  <div style="font-size:13px;color:var(--muted);text-align:center">Skip for now</div>
+</div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> <code>SearchField</code> · list → <code>ListBox selectionMode="multiple"</code> with <code>ListBox.Item</code> holding <code>Label</code> + <code>Description</code> + <code>ListBox.ItemIndicator</code>, inside a <code>Surface</code> · footer → <code>Button</code> primary + <code>Link</code></div>
+<div><b style="color:var(--foreground)">TOKENS</b> selected rows get <code>--accent-soft</code> fill, weight 600 <b>and</b> the indicator — three carriers. Event counts, not prayer counts, are the secondary line: this is the first place the events-first shift shows.</div>
+<div><b style="color:var(--foreground)">GAPS</b> none. The button label counts the selection, so the primary action states the outcome instead of saying “Continue”.</div>
+</div>
+</div>
+
+<!-- 10 NOTIFICATIONS -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--accent);color:var(--accent-foreground);padding:3px 7px;border-radius:5px">10</span><span style="font-size:15px;font-weight:600">Notifications</span><span style="font-size:12px;color:var(--muted)">new</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:none;height:44px;padding:0 16px;display:flex;align-items:center"><span style="width:44px;height:44px;margin-left:-10px;display:flex;align-items:center;justify-content:center"><svg width="24" height="24"><use href="#i-back"/></svg></span></div>
+<div style="flex:1;padding:0 16px;display:flex;flex-direction:column;gap:28px">
+  <div style="display:flex;flex-direction:column;gap:8px;padding:8px 8px 0">
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em">What should we tell you?</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.5">Change any of this later in Profile.</div>
+  </div>
+  <div style="border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface)">
+    <div style="padding:16px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:16px;font-weight:500">New events</span><span style="font-size:13px;color:var(--muted);line-height:1.45">When a masjid you follow posts something</span></div>
+      <span style="width:48px;height:28px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:flex-end;padding:2px;box-sizing:border-box;flex:none"><span style="width:24px;height:24px;border-radius:12px;background:var(--white)"></span></span>
+    </div>
+    <div style="height:1px;background:var(--separator);margin-left:16px"></div>
+    <div style="padding:16px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:16px;font-weight:500">Event reminders</span><span style="font-size:13px;color:var(--muted);line-height:1.45">A nudge before something you’re going to</span></div>
+      <span style="width:48px;height:28px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:flex-end;padding:2px;box-sizing:border-box;flex:none"><span style="width:24px;height:24px;border-radius:12px;background:var(--white)"></span></span>
+    </div>
+    <div style="height:1px;background:var(--separator);margin-left:16px"></div>
+    <div style="padding:16px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:16px;font-weight:500">Jamaat time changes</span><span style="font-size:13px;color:var(--muted);line-height:1.45">Only when a time actually moves</span></div>
+      <span style="width:48px;height:28px;border-radius:14px;background:var(--accent);display:flex;align-items:center;justify-content:flex-end;padding:2px;box-sizing:border-box;flex:none"><span style="width:24px;height:24px;border-radius:12px;background:var(--white)"></span></span>
+    </div>
+    <div style="height:1px;background:var(--separator);margin-left:16px"></div>
+    <div style="padding:16px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:16px;font-weight:500">Daily salah reminders</span><span style="font-size:13px;color:var(--muted);line-height:1.45">Five a day — off unless you want them</span></div>
+      <span style="width:48px;height:28px;border-radius:14px;background:var(--default);border:1px solid var(--border);display:flex;align-items:center;padding:2px;box-sizing:border-box;flex:none"><span style="width:24px;height:24px;border-radius:12px;background:var(--white);box-shadow:var(--field-shadow)"></span></span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="font-size:13.5px;font-weight:500;color:var(--muted);padding-left:4px">Remind me before an event</div>
+    <div style="display:flex;gap:8px">
+      <span style="font-size:14px;font-weight:500;background:var(--default);color:var(--default-foreground);padding:10px 14px;border-radius:12px">30 min</span>
+      <span style="font-size:14px;font-weight:500;background:var(--accent);color:var(--accent-foreground);padding:10px 14px;border-radius:12px">1 hour</span>
+      <span style="font-size:14px;font-weight:500;background:var(--default);color:var(--default-foreground);padding:10px 14px;border-radius:12px">Morning of</span>
+    </div>
+  </div>
+</div>
+<div style="flex:none;padding:0 16px 34px"><div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Save and continue</div></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> four rows → <code>Switch</code> with <code>Label</code> + <code>Description</code> inside a <code>Surface</code> · timing → <code>ToggleButtonGroup</code> (single selection), <b style="color:var(--foreground)">not</b> <code>Chip</code>s — these are controls, and DESIGN.md §3 reserves Chip for metadata</div>
+<div><b style="color:var(--foreground)">TOKENS</b> the three event switches default on and the salah one defaults off — the app’s emphasis expressed as a default. Switch is 48×28 with a 44pt row.</div>
+<div><b style="color:var(--foreground)">GAPS</b> none.</div>
+</div>
+</div>
+
+<!-- 11 DONE -->
+<div style="width:393px;display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;background:var(--accent);color:var(--accent-foreground);padding:3px 7px;border-radius:5px">11</span><span style="font-size:15px;font-weight:600">All set</span><span style="font-size:12px;color:var(--muted)">new</span></div>
+<div style="width:393px;height:852px;background:var(--background);border:1px solid var(--border);border-radius:32px;box-shadow:var(--surface-shadow);overflow:hidden;display:flex;flex-direction:column">
+<div style="height:50px;padding:0 26px 8px;display:flex;align-items:flex-end;justify-content:space-between;font-size:13px;font-weight:600;flex:none"><span>9:41</span><span style="width:23px;height:11px;border:1px solid var(--foreground);border-radius:3px;position:relative"><span style="position:absolute;inset:2px;background:var(--foreground);border-radius:1px"></span></span></div>
+<div style="flex:1;padding:0 24px;display:flex;flex-direction:column;justify-content:center;gap:32px;padding-bottom:40px">
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <span style="width:64px;height:64px;border-radius:20px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center"><svg width="34" height="34"><use href="#i-check"/></svg></span>
+    <div style="font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.15">You’re all set, Yusuf</div>
+    <div style="font-size:16px;color:var(--muted);line-height:1.55;text-wrap:pretty">Following <span style="color:var(--foreground);font-weight:500">Masjidul Quds</span> and <span style="color:var(--foreground);font-weight:500">Masjidus Sunni</span>. Here’s what’s on this week.</div>
+  </div>
+  <div style="border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden">
+    <div style="padding:14px 16px;display:flex;gap:14px;align-items:center">
+      <div style="width:46px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="font-size:12px;color:var(--muted);font-weight:500">THU</span><span style="font-size:22px;font-weight:600;line-height:1.05">3</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:15.5px;font-weight:500">Tafsīr of Sūrah Yūsuf</span><span style="font-size:13px;color:var(--muted)">19:45 · Masjidul Quds</span></div>
+    </div>
+    <div style="height:1px;background:var(--separator);margin-left:16px"></div>
+    <div style="padding:14px 16px;display:flex;gap:14px;align-items:center">
+      <div style="width:46px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="font-size:12px;color:var(--muted);font-weight:500">SAT</span><span style="font-size:22px;font-weight:600;line-height:1.05">5</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:15.5px;font-weight:500">Soup kitchen — packing day</span><span style="font-size:13px;color:var(--muted)">09:00 · Masjidus Sunni</span></div>
+    </div>
+  </div>
+  <div style="height:54px;border-radius:12px;background:var(--accent);color:var(--accent-foreground);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500">Take me Home</div>
+</div>
+<div style="height:34px;flex:none"></div>
+</div>
+<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.65;color:var(--muted);display:flex;flex-direction:column;gap:7px">
+<div><b style="color:var(--foreground)">COMPONENTS</b> <code>Surface</code> + two rows of <code>Typography</code> · <code>Button</code> primary · confirmation icon tile is a plain <code>div</code> with the <code>i-check</code> glyph</div>
+<div><b style="color:var(--foreground)">TOKENS</b> the only screen where <code>--accent</code> appears as a large solid fill outside a button — it earns it once, as the confirmation. 3 type sizes (28 / 16 / 13).</div>
+<div><b style="color:var(--foreground)">GAPS</b> none. This screen exists to prove the setup worked by showing real events, rather than claiming success and dropping the user into an unexplained Home.</div>
+</div>
+</div>
+
+</div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:900}}"></script>
+</body>
+</html>
