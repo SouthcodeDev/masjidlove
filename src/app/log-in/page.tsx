@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Input, Label, TextField, Typography } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { LinkButton } from "@/components/onboarding/link-button";
-import { useOnboardingState } from "@/hooks/use-onboarding-state";
-import { IconApple, IconGoogle, BrandHeart } from "@/components/icons";
+import { LinkButton } from "@/components/link-button";
+import { useUserState } from "@/hooks/use-user-state";
+import Image from "next/image";
+import { IconApple, IconGoogle } from "@/components/icons";
 
 export default function LogInPage() {
   const router = useRouter();
-  const [, update] = useOnboardingState();
+  const [, update] = useUserState();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -26,9 +27,13 @@ export default function LogInPage() {
     <OnboardingScreen back backHref="/">
       <div className="flex flex-1 flex-col gap-8 px-6">
         <div className="flex flex-col items-center gap-3 pt-2">
-          <span className="text-accent">
-            <BrandHeart size={64} />
-          </span>
+          <Image
+            src="/app-icon.png"
+            alt="MasjidLove"
+            width={64}
+            height={64}
+            className="block h-16 w-16 rounded-2xl"
+          />
           <Typography.Heading level={2}>Welcome back</Typography.Heading>
         </div>
 

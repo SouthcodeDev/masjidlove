@@ -9,6 +9,14 @@ const EVENTS: Event[] = [
     date: "2026-09-10",
     time: "19:45",
     masjidId: "masjidul-quds",
+    kind: "Weekly",
+    description:
+      "Shaykh Ismail Londt continues the weekly tafsīr, working verse by verse through Sūrah Yūsuf this term. Everyone is welcome — seating for women upstairs. No registration, no charge. Tea afterwards in the courtyard.",
+    whenNote: "After Isha jamaat · about 45 min",
+    whereNote: "18 Duine Rd, Gatesville",
+    goingCount: 42,
+    maybeCount: 6,
+    myRsvp: "going",
   },
   {
     id: "soup-kitchen",
@@ -16,9 +24,47 @@ const EVENTS: Event[] = [
     date: "2026-09-12",
     time: "09:00",
     masjidId: "masjidus-sunni",
+    kind: "Volunteers needed",
+    description:
+      "We pack 400 soup packs for the surrounding neighbourhood every second Saturday. Gloves and aprons provided — bring a cap for the yard. An hour of your morning makes a real difference.",
+    whenNote: "Until about 11:30 · yard behind the hall",
+    whereNote: "Masjidus Sunni, Rylands",
+    goingCount: 18,
+    maybeCount: 9,
+  },
+  {
+    id: "madrasah-registration",
+    title: "Madrasah registration",
+    date: "2026-09-13",
+    time: "10:00",
+    masjidId: "habibia",
+    kind: "Open to all",
+    description:
+      "Registration for the new madrasah year. Bring the child's birth certificate and last report. Teachers will be available to answer questions about class times and Qāʿidah placement.",
+    whenNote: "10:00 – 13:00 · main hall",
+    goingCount: 12,
+    maybeCount: 2,
+  },
+  {
+    id: "janazah-workshop",
+    title: "Janāzah rites workshop",
+    date: "2026-09-16",
+    time: "18:30",
+    masjidId: "masjidul-quds",
+    kind: "Weekly",
+    description:
+      "A practical walk-through of the janāzah prayer, washing and shrouding, led by the masjid's imams. Spaces are limited to keep the hall workable — please RSVP so we can prepare materials.",
+    whenNote: "After Maghrib jamaat · about 90 min",
+    goingCount: 31,
+    maybeCount: 4,
+    myRsvp: "cant-go",
   },
 ];
 
 export function listEvents(): Event[] {
   return EVENTS;
+}
+
+export function getEvent(id: string): Event | undefined {
+  return EVENTS.find((e) => e.id === id);
 }

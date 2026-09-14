@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { useOnboardingState } from "@/hooks/use-onboarding-state";
+import { useUserState } from "@/hooks/use-user-state";
 import { IconCamera } from "@/components/icons";
 
 const AREAS = [
@@ -29,7 +29,7 @@ const AREAS = [
 
 export default function ProfileSetupPage() {
   const router = useRouter();
-  const [state, update] = useOnboardingState();
+  const [state, update] = useUserState();
   const [name, setName] = useState(state.name);
   const [area, setArea] = useState<string>(state.area);
 

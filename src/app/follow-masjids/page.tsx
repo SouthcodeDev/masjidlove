@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { useOnboardingState } from "@/hooks/use-onboarding-state";
+import { useUserState } from "@/hooks/use-user-state";
 import { formatDistance, listMasjids } from "@/services/masjids";
 import {
   IconBookmark,
@@ -18,7 +18,7 @@ import {
 
 export default function FollowMasjidsPage() {
   const router = useRouter();
-  const [state, update] = useOnboardingState();
+  const [state, update] = useUserState();
   const [query, setQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>(
     state.followedMasjidIds

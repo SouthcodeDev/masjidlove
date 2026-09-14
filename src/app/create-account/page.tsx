@@ -13,11 +13,11 @@ import {
   Typography,
 } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { useOnboardingState } from "@/hooks/use-onboarding-state";
+import { useUserState } from "@/hooks/use-user-state";
 
 export default function CreateAccountPage() {
   const router = useRouter();
-  const [, update] = useOnboardingState();
+  const [, update] = useUserState();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

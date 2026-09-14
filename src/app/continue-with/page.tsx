@@ -2,9 +2,9 @@
 
 import { Link, Typography } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { LinkButton } from "@/components/onboarding/link-button";
+import { LinkButton } from "@/components/link-button";
+import Image from "next/image";
 import {
-  BrandHeart,
   IconApple,
   IconFacebook,
   IconGoogle,
@@ -16,9 +16,13 @@ export default function ContinueWithPage() {
     <OnboardingScreen back backHref="/">
       <div className="flex flex-1 flex-col justify-center gap-10 pb-16">
         <div className="flex flex-col items-center gap-4">
-          <span className="text-accent">
-            <BrandHeart size={76} />
-          </span>
+          <Image
+            src="/app-icon.png"
+            alt="MasjidLove"
+            width={76}
+            height={76}
+            className="block h-[76px] w-[76px] rounded-[19px]"
+          />
           <Typography.Heading level={2}>Create your account</Typography.Heading>
           <Typography.Paragraph className="max-w-[290px] text-center text-muted">
             One account, all your masjids. Nothing is shared without you

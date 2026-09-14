@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { useOnboardingState } from "@/hooks/use-onboarding-state";
+import { useUserState } from "@/hooks/use-user-state";
 import type { NotificationPreferences } from "@/types";
 
 const LEAD_OPTIONS: { value: NotificationPreferences["reminderLead"]; label: string }[] = [
@@ -51,7 +51,7 @@ function NotificationRow({
 
 export default function NotificationsPage() {
   const router = useRouter();
-  const [state, update] = useOnboardingState();
+  const [state, update] = useUserState();
   const [prefs, setPrefs] = useState<NotificationPreferences>(
     state.notifications
   );

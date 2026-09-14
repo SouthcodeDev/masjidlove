@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { useOnboardingState } from "@/hooks/use-onboarding-state";
+import { useUserState } from "@/hooks/use-user-state";
 import { IconMail } from "@/components/icons";
 
 const OTP_LENGTH = 6;
@@ -19,7 +19,7 @@ const RESEND_SECONDS = 45;
 
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const [state] = useOnboardingState();
+  const [state] = useUserState();
   const [code, setCode] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
 

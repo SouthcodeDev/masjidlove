@@ -41,7 +41,7 @@
   --border: #dfe3e1;
   --separator: #eaedeb;
   --focus: #16603a;
-  --link: #1b5fc4;
+  --link: #0d7442;
 
   --radius: 16px;
   --field-radius: 12px;
@@ -131,6 +131,11 @@ button,
 @theme inline {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     sans-serif;
+  /* Fixed brand colours aren't bridged by @heroui/styles — add them here */
+  --color-snow: var(--snow);
+  --color-eclipse: var(--eclipse);
+  --color-white: var(--white);
+  --color-black: var(--black);
 }
 
 /* The container: full width at the 390px design viewport, centred column on desktop */

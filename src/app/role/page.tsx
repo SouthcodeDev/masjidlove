@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Radio, RadioGroup, Typography } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { useOnboardingState } from "@/hooks/use-onboarding-state";
+import { useUserState } from "@/hooks/use-user-state";
 import {
   IconAdmin,
   IconCheck,
@@ -64,7 +64,7 @@ function RoleCard({
 
 export default function RolePage() {
   const router = useRouter();
-  const [, update] = useOnboardingState();
+  const [, update] = useUserState();
   const [role, setRole] = useState<OnboardingRole | null>(null);
 
   function proceed() {

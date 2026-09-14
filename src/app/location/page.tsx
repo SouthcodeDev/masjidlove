@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button, Typography } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { LinkButton } from "@/components/onboarding/link-button";
+import { LinkButton } from "@/components/link-button";
 import { IconCheck, IconLocate } from "@/components/icons";
 
 const PROMISES = [

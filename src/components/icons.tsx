@@ -227,22 +227,3 @@ export function IconFacebook(props: IconProps) {
   );
 }
 
-/** Brand heart — the mark from the spec, drawn at any size. */
-export function BrandHeart({ size = 24, ...props }: IconProps) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={7}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-      {...props}
-    >
-      <path d="M50 91C50 91 9 58 9 34C9 16 25 8 37 14C47 19 50 30 50 36C50 30 53 19 63 14C75 8 91 16 91 34C91 58 50 91 50 91Z" />
-    </svg>
-  );
-}

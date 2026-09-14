@@ -2,8 +2,8 @@
 
 import { Typography } from "@heroui/react";
 import { OnboardingScreen } from "@/components/onboarding/screen";
-import { LinkButton } from "@/components/onboarding/link-button";
-import { useOnboardingState } from "@/hooks/use-onboarding-state";
+import { LinkButton } from "@/components/link-button";
+import { useUserState } from "@/hooks/use-user-state";
 import { getMasjid } from "@/services/masjids";
 import { listEvents } from "@/services/events";
 import { IconCheck } from "@/components/icons";
@@ -19,7 +19,7 @@ function dayLabel(isoDate: string) {
 }
 
 export default function AllSetPage() {
-  const [state] = useOnboardingState();
+  const [state] = useUserState();
 
   const followedNames = state.followedMasjidIds
     .map((id) => getMasjid(id)?.name)
@@ -81,9 +81,7 @@ export default function AllSetPage() {
           })}
         </div>
 
-        {/* Home doesn't exist yet — the main-app screens need their spec.
-            For now the flow loops to the start. */}
-        <LinkButton href="/" variant="primary" size="lg" fullWidth>
+        <LinkButton href="/home" variant="primary" size="lg" fullWidth>
           Take me Home
         </LinkButton>
       </div>
